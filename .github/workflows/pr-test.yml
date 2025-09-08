@@ -1,0 +1,25 @@
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: amateur-mega-disks
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: 
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.4
+      
+      - name: Execute Gradle build
+        run: gradle build

@@ -1,0 +1,91 @@
+KRA,KPI,KPI Description
+Results,Tracking active defects and authoring tests ,1. Depending on the magnitude and complexity of the Project. The word “active” for this KPI could mean the status is either new open or fixed
+,        ,2. Design the required tests
+,        ,3. This is to measure overall regression testing effectiveness
+,,
+Results,Overall Level of Execution ,This is to check how well the work is executed in terms of:
+,        ,1. Clarity in process of execution
+,        ,2. Meeting the deadlines
+,        ,3. Client satisfaction
+,        ,4. Team bonding/handling
+,        ,5. Finding and solving tickets
+,,
+Results,Level of Creativity or Innovation ,This is to check the level of creativity applied by him/her on a particular project:
+,        ,1. Grabbing new opportunities
+,        ,2. Leading the path for the project
+,        ,3. Implementation of the project
+,        ,4. Thinking out of the box
+,        ,5. New suggestions/improvements given to clients
+,,
+Results,Reviewing quality specifications ,"Ensure the product meets the customer specifications during processing, making sure that the software adheres to the standards set by the development company."
+,,
+Results,Tasks Completed on Time and passed test ,This is to check whether the QA is finishing the task appointed to him or her on time or not:
+,        ,1. Time taken to complete a new task
+,        ,2. Efficiency
+,        ,3. Work on Spillover tasks/tickets
+,        ,4. To track the percentage of requirements covered by at least one test
+,        ,5. To track the accuracy of the test
+,,
+Results,Accuracy in writing test cases ,This KPI is to check:
+,        ,1. All scenarios of application or module are covered
+,        ,2. Easy to understand for non-technical background people also
+,,
+Results,Understanding the specifications / story / features ,This KPI is to check if the requirement is understood properly or not.
+,        ,1. Properly understanding the client’s requirement
+,        ,2. Working on the suggested changes immediately
+,        ,3. Number of questions asked to the client for clarification
+,,
+Results,Speed of creating bug tickets ,This KPI is to make sure the QA is:
+,        ,1. Bug tickets are created quickly
+,        ,2. Screenshots videos are added for Developers
+,,
+Results,Detail-oriented ,Being detail-oriented ensures
+,        ,1. No disruptive activities in the supply chain and it also brings lesser instances of reworking and spending more time than necessary.
+,        ,2. Check all the nuances of the tiniest submissions and even large-scale product modifications that are implemented in a team
+,,
+,,
+Skills and Knowledge Growth,Collaboration and Leadership ,"QAs may interact with company executives, managers, programmers, and a hierarchy of testers. In fact the product does not release into the market until the QA has communicated and resolved all product uncertainties with these professionals."
+,        ,1. Defining the scope of the project
+,        ,2. Leading the entire process
+,        ,3. Value-centric collaboration
+,        ,4. Reduced cost of implementation
+,,
+Skills and Knowledge Growth,Flexibility in analytical approaches ,"Awareness regarding design approaches, manufacturing pipelines, and the desired product features prove beneficial for QAs. This is especially true when it comes to abiding by a particular set of guidelines that safeguards the peculiarity of a product. Overall, a thorough hold on varying analytical methodologies for QAs makes them a multi-purpose resource for strengthening a company's quality control system."
+,        ,1.  Can they find a quick solution to the problem?
+,        ,2.  Raising alarms when things are not as per deadlines
+,,
+Skills and Knowledge Growth,Communication ,"They may be with clients, stakeholders, and several influential personalities within an organisation. Everything from stating defects, creating reports and bug-resolving options must remain transparent to keep responsible authorities looped into the core processes. Whether it is informal or formal communication, or face-to-face or via documents, QAs must ensure it is foolproof."
+,        ,1. Confidence while talking to clients
+,        ,2. Interpersonal skills
+,        ,3. Active Listening
+,        ,4. Collaboration and coordination with the team
+,,
+Skills and Knowledge Growth,Time management ,Quality analysts have not only their own goals regarding deadlines. They are responsible for working closely with other teams that have deadlines as well. In short the better hold a QA has over their time management etiquette's the better performance they showcase.
+,,
+Skills and Knowledge Growth,Team Satisfaction ,"Developers, Testers, BA and Project Managers can be interviewed to find out how effective the QA was. This KPI can be measured by:"
+,        ,1. Explaining the solutions
+,        ,2. Writing the project documents
+,        ,3. Interacting with the client
+,        ,4. Behaviour with the team
+,        ,5. Regular one-on-one sessions with the team
+,,
+Skills and Knowledge Growth,Check' and 'Act’ ,"Collect data, see quality issues, call meetings to solve quality issues, work as liaison between different departments Design of Experiments(DOE), SPC Process Capability or designing the quality system of the organization (The 'Plan' part in PDCA) requirements analysis and risk assessment "
+,,
+Attitude Fitment,Contribution to ScaleReal's growth ,This is to check whether the BA is contributing significantly to the ScaleReal’s Growth or not. This KPI can include:
+,        ,1. Client Relations
+,        ,2. Budgeting and forecasting
+,        ,3. Planning of projects and problems
+,        ,4. Finding opportunities and explications for the business.
+,        ,5. Systems and operations support
+,        ,6. Allocation management
+,        ,"7. Help in hiring (tips, sourcing, interviews etc)"
+,        ,8. Help in overall ScaleReal’s activities
+,,
+Attitude Fitment,Ability to Take Ownership ,This is to check how honestly the QA takes ownership of the project handled by him or her:
+,        ,1. Ability to lead people
+,        ,2. Risk-taking attitude
+,        ,3. Accountability
+,,
+Attitude Fitment,Critical Thinking ,Critical thinking increases the chances of diagnosing bugs and fixing them before the product moves up in its development life cycle.
+,        ,1. Churn out solutions effectively
+,        ,2. Good problem-solving capabilities

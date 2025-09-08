@@ -1,0 +1,133 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
+plugins {
+    id "application"
+    id 'com.github.johnrengelman.shadow'
+}
+sourceSets.main.kotlin.srcDirs += "gen"
+sourceSets.main.resources.srcDirs += "spec"
+
+group 'sample.service'
+version '0.1'
+
+mainClassName = "scalereal.api.ApiApplication"
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    setArchivesBaseName("sample-service")
+}
+
+
+configurations {
+    apifi
+}
+
+sourceSets {
+    devOnly {
+        kotlin.srcDirs = ['dev-src']
+        resources.srcDirs = ['dev-res']
+        java.srcDirs = [] // disable java devOnly dirs
+        compileClasspath += sourceSets.main.runtimeClasspath
+    }
+}
+
+dependencies {
+    implementation project(':core')
+    implementation project(':connector')
+    implementation project(':connector:db')
+
+    compileOnly libs.graalvm.nativeImageSvm
+    devOnly platform(libs.micronaut.bom)
+    devOnly libs.micronaut.httpServerNetty
+
+    implementation platform(libs.micronaut.bom)
+    implementation libs.micronaut.httpClient
+
+    implementation(libs.micronaut.functionAwsApiProxy) {
+        exclude group: "org.slf4j", module: "slf4j-api"
+    }
+    implementation libs.micronaut.coroutines
+    implementation libs.kotlin.reflect
+    implementation libs.micronaut.security.oauth2
+    implementation libs.micronaut.security.jwt
+    implementation libs.micronaut.runtime
+    implementation libs.jackson.kotlinModule
+    implementation libs.micronaut.reactor
+
+    runtimeOnly libs.logback.classic
+    runtimeOnly libs.jackson.kotlinModule
+
+    testImplementation libs.testcontainer.postgresql
+    testImplementation libs.postgresql.postgresql
+    testImplementation libs.postgresql.jdbc4
+    testImplementation libs.liquibase.core
+    testImplementation libs.jackson.jaxbAnnotations
+    testImplementation project(":core").sourceSets.test.output
+
+    kapt libs.micronaut.openApi
+    implementation libs.swagger.annotations
+
+    implementation libs.slack.slackBolt
+    implementation libs.micronaut.serverNetty
+    implementation libs.slack.slackBoltServer
+    implementation libs.slack.slackBoltJetty
+    implementation libs.slack.serialization
+    implementation libs.slack.jsonobject
+    implementation libs.micronaut.views
+    implementation libs.micronaut.httpServerNetty
+
+    kapt platform(libs.micronaut.bom)
+    kapt libs.micronaut.graal
+    kapt libs.micronaut.validation
+    kapt libs.micronaut.security.security
+    kapt libs.micronaut.inject.java
+    kaptDevOnly libs.micronaut.inject.java
+
+    kaptTest platform(libs.micronaut.bom)
+    kaptTest libs.micronaut.inject.java
+
+    // For OSX Only
+    if (DefaultNativePlatform.currentOperatingSystem.isMacOsX()) {
+        devOnly "io.micronaut:micronaut-runtime-osx"
+        devOnly "net.java.dev.jna:jna"
+        devOnly "io.methvin:directory-watcher"
+    }
+}
+
+shadowJar {
+    mergeServiceFiles()
+    transform(Log4j2PluginsCacheFileTransformer)
+}
+
+task buildZip(type: Zip) {
+    from sourceSets.main.output
+    into('lib') {
+        from configurations.compileClasspath
+        from configurations.runtimeClasspath
+    }
+}
+
+shadowJar.dependsOn buildZip
+
+tasks.withType(JavaExec) {
+    classpath += configurations.devOnly
+    classpath += sourceSets.devOnly.runtimeClasspath
+    jvmArgs('-noverify',
+            '-XX:TieredStopAtLevel=1',
+            '-Dcom.sun.management.jmxremote',
+            "-Dlogback.configurationFile=logback-dev.xml",
+            '-Dmicronaut.environments=dev')
+}
+
+kapt {
+    arguments {
+        arg("micronaut.openapi.views.spec", "swagger-ui.enabled=true,swagger-ui.theme=flattop")
+    }
+}
+
+run.dependsOn(":migration:run")
+

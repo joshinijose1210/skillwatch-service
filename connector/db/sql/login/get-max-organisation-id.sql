@@ -1,0 +1,1 @@
+SELECT MAX(sr_no) as max_id FROM organisations;

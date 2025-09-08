@@ -1,0 +1,1 @@
+INSERT INTO team_designation_mapping(team_id, designation_id)VALUES (:teamId, :designationId);

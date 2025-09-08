@@ -1,0 +1,38 @@
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'io.micronaut:micronaut-http-server-netty'
+    implementation platform(libs.micronaut.bom)
+
+    implementation libs.opencsv.openCsv
+    implementation libs.slf4j.simple
+    implementation libs.jackson.kotlinModule
+    implementation libs.swagger.annotations
+
+    implementation libs.apache.commonsCsv
+    implementation libs.apache.commonsLang
+    implementation libs.jetbrains.kotlinxHtml.jvm
+    implementation libs.kotlinx.serialization
+
+    implementation libs.micronaut.awsSES
+    implementation libs.micronaut.libPhoneNumber
+    implementation libs.micronaut.objectStorage
+    implementation libs.micronaut.slack
+    implementation libs.micronaut.reactor
+    implementation libs.micronaut.security.jwt
+    implementation libs.micronaut.inject.inject
+
+    implementation libs.slack.jsoup
+    implementation libs.slack.copydown
+    implementation libs.slack.pegdown
+    implementation libs.slack.commonmark
+    implementation libs.slack.flexmark
+    implementation libs.pdf.itextpdf
+    implementation libs.pdf.html2pdf
+    kapt platform(libs.micronaut.bom)
+    kapt libs.micronaut.inject.java
+
+    kaptTest libs.micronaut.inject.java
+}

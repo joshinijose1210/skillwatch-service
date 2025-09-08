@@ -1,0 +1,70 @@
+# Temp Files
+*~
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+.gradle
+**/build/
+!src/**/build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Cache of project
+.gradletasknamecache
+
+# Eclipse Gradle plugin generated files
+# Eclipse Core
+.project
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+#################
+#MacOS
+.DS_Store
+
+################
+# Intellij
+.idea
+*.iml
+out/
+
+# Intellij older format project files
+*.ipr
+*.iws
+
+###############
+#Gragle / JVM
+build/
+.gradle
+
+# Compiled class file
+*.class
+
+# Package Files #
+*.zip
+*.jar
+*.tar
+*.war
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+#dev-res
+dev-res/
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Avoid ignore Gradle wrappper properties
+!gradle-wrapper.properties
+
+#Avoid exporting env variable file
+export.sh

@@ -1,0 +1,81 @@
+package reviewCycle
+
+import java.sql.Date
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+import java.sql.Timestamp
+import kotlin.Boolean
+import kotlin.Long
+import kotlin.String
+import norm.ParamSetter
+import norm.Query
+import norm.RowMapper
+
+data class GetActiveReviewCycleParams(
+  val organisationId: Long?
+)
+
+class GetActiveReviewCycleParamSetter : ParamSetter<GetActiveReviewCycleParams> {
+  override fun map(ps: PreparedStatement, params: GetActiveReviewCycleParams) {
+    ps.setObject(1, params.organisationId)
+  }
+}
+
+data class GetActiveReviewCycleResult(
+  val organisationId: Long,
+  val id: Long,
+  val startDate: Date,
+  val endDate: Date,
+  val publish: Boolean,
+  val lastModified: Timestamp,
+  val selfReviewStartDate: Date,
+  val selfReviewEndDate: Date,
+  val managerReviewStartDate: Date,
+  val managerReviewEndDate: Date,
+  val checkInStartDate: Date,
+  val checkInEndDate: Date
+)
+
+class GetActiveReviewCycleRowMapper : RowMapper<GetActiveReviewCycleResult> {
+  override fun map(rs: ResultSet): GetActiveReviewCycleResult = GetActiveReviewCycleResult(
+  organisationId = rs.getObject("organisation_id") as kotlin.Long,
+    id = rs.getObject("id") as kotlin.Long,
+    startDate = rs.getObject("start_date") as java.sql.Date,
+    endDate = rs.getObject("end_date") as java.sql.Date,
+    publish = rs.getObject("publish") as kotlin.Boolean,
+    lastModified = rs.getObject("last_modified") as java.sql.Timestamp,
+    selfReviewStartDate = rs.getObject("self_review_start_date") as java.sql.Date,
+    selfReviewEndDate = rs.getObject("self_review_end_date") as java.sql.Date,
+    managerReviewStartDate = rs.getObject("manager_review_start_date") as java.sql.Date,
+    managerReviewEndDate = rs.getObject("manager_review_end_date") as java.sql.Date,
+    checkInStartDate = rs.getObject("check_in_start_date") as java.sql.Date,
+    checkInEndDate = rs.getObject("check_in_end_date") as java.sql.Date)
+}
+
+class GetActiveReviewCycleQuery : Query<GetActiveReviewCycleParams, GetActiveReviewCycleResult> {
+  override val sql: String = """
+      |SELECT
+      |  review_cycle.organisation_id,
+      |  review_cycle.id,
+      |  review_cycle.start_date,
+      |  review_cycle.end_date,
+      |  review_cycle.publish,
+      |  review_cycle.last_modified,
+      |  review_cycle.self_review_start_date,
+      |  review_cycle.self_review_end_date,
+      |  review_cycle.manager_review_start_date,
+      |  review_cycle.manager_review_end_date,
+      |  review_cycle.check_in_start_date,
+      |  review_cycle.check_in_end_date
+      |FROM
+      |  review_cycle
+      |WHERE
+      |review_cycle.organisation_id = ?
+      |AND review_cycle.publish = TRUE;
+      |""".trimMargin()
+
+  override val mapper: RowMapper<GetActiveReviewCycleResult> = GetActiveReviewCycleRowMapper()
+
+  override val paramSetter: ParamSetter<GetActiveReviewCycleParams> =
+      GetActiveReviewCycleParamSetter()
+}

@@ -1,0 +1,13 @@
+Employee Id, First Name, Last Name, Email Id, Contact No., Active, Team, Designation, Role, First Manager Employee Id, Second Manager Employee Id (Optional)
+SR0000, John, Doe, johndoe@example.com, 9988776655, true, Development, Engineer, Full Stack, SR0001
+SR0001, Syed Ubed, Ali, syed.ali@scalereal.com, 9876543210, true, QA, Tester, Manual, SR0001
+SR0002, Aashish, Brown, michaelbrown@example.com, 9876543211, true, Operations, Manager, Operations, SR0001
+SR0003, David, Beckham, davidjones@example.com, 9876543212, true, HR, HR Manager, Recruitment, E005
+E005, Susan, Wilson, susanwilson@example.com, 987654321, true, Finance,Accountant, Accounts, E006
+E005, Susan, Wilson, susanwilson@example.com, 9876543213, true, Finance, Accountant, Accounts, E006
+E005, Susan, Wilson, susanwilson@example.com,9876543214, true, Backend, Accountant, Accounts, E006
+E005, Susan, Wilson, susanwilson@example.com, 9876543215, true, Backend, Jr, Accounts, E006
+E005, Susan, Wilson, susanwilson@example.com, 9876543216, true, Backend, Jr, Jr, E006
+SR00212, Abhishek, Ghadge, abhishek.ghadge@scalereal.com, 7741876872, true, FE, Sr, Sr, SR0043
+SR0039, Aamir, Islam, aamir.islam@scalereal.com, 7060753642, true, FE, Jr, Jr, SR00212, SR0043
+SR00458, Jasmeet, Singh, jasmeetsinghhhhh@scalereal.com, 9730502949, true, FE, Jr, Jr, SR00212

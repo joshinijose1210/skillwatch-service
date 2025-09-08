@@ -1,0 +1,51 @@
+SELECT
+  feedback_request.id AS request_id,
+  feedback_request.requested_by AS requested_by_id,
+  feedback_request.feedback_to AS feedback_to_id,
+  feedback_request.feedback_from AS feedback_from_id,
+  feedback_request.created_at AS requested_on,
+  feedback_request.is_submitted,
+  feedback_request.is_external_request,
+  requested_by.emp_id AS requested_by_employee_id,
+  requested_by.first_name AS requested_by_first_name,
+  requested_by.last_name AS requested_by_last_name,
+  feedback_to.organisation_id AS organisation_id,
+  feedback_to.emp_id AS feedback_to_employee_id,
+  feedback_to.first_name AS feedback_to_first_name,
+  feedback_to.last_name AS feedback_to_last_name,
+  COALESCE(feedback_from.emp_id, null) AS feedback_from_employee_id,
+  COALESCE(feedback_from.first_name, null) AS feedback_from_first_name,
+  COALESCE(feedback_from.last_name, null) AS feedback_from_last_name,
+  COALESCE(external_email.email_id, null) AS external_feedback_from_email,
+  COALESCE(d.has_draft_feedback, false) AS is_draft
+FROM
+  feedback_request
+  INNER JOIN employees AS requested_by
+    ON feedback_request.requested_by = requested_by.id
+    AND requested_by.organisation_id = :organisationId
+    AND requested_by.status = true
+  INNER JOIN employees AS feedback_to
+    ON feedback_request.feedback_to = feedback_to.id
+    AND feedback_to.organisation_id = :organisationId
+    AND feedback_to.status = true
+  LEFT JOIN employees AS feedback_from
+    ON feedback_request.feedback_from = feedback_from.id
+    AND feedback_from.organisation_id = :organisationId
+  LEFT JOIN external_feedback_emails AS external_email
+    ON feedback_request.feedback_from_external_id = external_email.id
+    AND external_email.organisation_id = :organisationId
+  LEFT JOIN review_cycle ON DATE(feedback_request.created_at) BETWEEN review_cycle.start_date AND review_cycle.end_date
+    AND review_cycle.organisation_id = :organisationId
+  LEFT JOIN feedback_request_draft_flags d
+     ON d.feedback_request_id = feedback_request.id
+WHERE
+  (:requestedById::INT[] = '{-99}' OR feedback_request.requested_by = ANY(:requestedById::INT[]))
+  AND (:feedbackFromId::INT[] = '{-99}' OR feedback_request.feedback_from = ANY(:feedbackFromId::INT[]))
+  AND (:feedbackToId::INT[] = '{-99}' OR feedback_request.feedback_to = ANY(:feedbackToId::INT[]))
+  AND (:isSubmitted::BOOL[] = '{true,false}' OR feedback_request.is_submitted = ANY(:isSubmitted::BOOL[]))
+  AND (:reviewCycleId::INT[] = '{-99}' OR review_cycle.id = ANY(:reviewCycleId::INT[]))
+ORDER BY
+  CASE WHEN :sortBy = 'dateDesc' THEN feedback_request.created_at END DESC,
+  CASE WHEN :sortBy = 'dateAsc' THEN feedback_request.created_at END ASC
+OFFSET (:offset::INT)
+LIMIT (:limit::INT);

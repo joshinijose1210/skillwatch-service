@@ -1,0 +1,26 @@
+INSERT INTO employees (
+    emp_id,
+    first_name,
+    last_name,
+    email_id,
+    contact_no,
+    gender_id,
+    date_of_joining,
+    date_of_birth,
+    experience,
+    status,
+    is_consultant,
+    organisation_id)
+VALUES (
+    :empId,
+    :firstName,
+    :lastName,
+    :emailId,
+    :contactNo,
+    :genderId,
+    :dateOfJoining,
+    :dateOfBirth,
+    :experience,
+    :status,
+    :isConsultant,
+    :organisationId) RETURNING * ;

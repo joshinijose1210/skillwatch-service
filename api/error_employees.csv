@@ -1,0 +1,2 @@
+Employee Id, First Name, Last Name, Email Id, Contact No.(with Country Code), Gender(M/F/O), Date of Birth (DD-MM-YYYY), Active(Y/N), Department, Team, Designation, Role, Manager 1 Employee Id, Manager 2 Employee Id (Optional), Date of Joining (DD-MM-YYYY), Years of Experience (Years | Months), Consultant(Y/N)
+A0010, Palak, Agarwal, palak.agarwal@scalereal.com, +919087654312, F, 09-10-1999, y, Orgs, Org, ORG, Human Resource, A0001, , 09-11-2022, 5 | 9, n, "Department does not exist or inactive, Team does not exist in Department Orgs"

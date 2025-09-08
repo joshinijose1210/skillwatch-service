@@ -1,0 +1,89 @@
+KRA,KPI,KPI Description
+Results,Overall Level of execution ,This KPI is to check how well the project is executed in terms of: 
+,        ,1. Clarity in Execution
+,        ,2. Meeting the Deadlines
+,        ,3. Understanding the client's requirements
+,        ,4. Coding Standards
+,,
+Results,Quality of work ,Engineers who value quality and are genuinely involved in the work process are likely to show better results:
+,        ,1. Accuracy
+,        ,2. Thoroughness
+,        ,3. Competence
+,        ,4. Number of bugs during development
+,        ,5. Number of bugs in production
+,,
+Results,Level of creativity or innovation ,This KPI checks the level of creativity or innovation a person can bring to his or her projects:
+,        ,1. Doing their own research
+,        ,2. Not Copying everything from the internet
+,        ,3. Proper Execution of the process
+,        ,4. Thinking out of the box
+,        ,5. New suggestions/improvements given to BA/PM
+,        ,
+Results,Amount of consistent improvement ,This is to check whether the employee is improving in the work he or she is doing or not. 
+,        ,1. Timely submission of Tasks/Features 
+,        ,2. Taking Feedback into consideration 
+,        ,3. Agile practices
+,,
+Results,Code Review Feedback ,This KPI is to check whether the Code review is done properly or not. 
+,        ,1. Code is properly functional or not 
+,        ,2. Followed proper guidelines 
+,        ,3. Put down logic instead copy/paste from Internet 
+,,4. Problem solving approach
+,,
+Results,Percentage of tasks completed on time ,This is to check whether the employee is finishing the task appointed to him or her at the given time or not and if not then is a valid reason given by them or not.
+,,
+Results,Preparation of documentation as desired ,This is to check whether desired documents are prepared by the employee or not on time:
+,        ,1. On-time updating of documents on Notion
+,        ,2. Documenting and taking notes during any imp meetings
+,,
+Results,Product Knowledge ,This is to check whether the employee has the relevant knowledge about the product he or she is working on:
+,        ,1. Requirements regarding product
+,        ,2. Well research of the product
+,,
+Skills and Knowledge Growth,Ability to take ownership ,This is to check how honestly an employee takes ownership of the project handled by him or her:
+,        ,1. Ability to lead people
+,        ,2. Risk-taking attitude
+,        ,3. Accountability
+,,
+Skills and Knowledge Growth,Communication skills ,This is to check whether the employee is able to communicate well with their peers:
+,        ,1. Confidence
+,        ,2. Ability to communicate themselves
+,        ,3. Active Listening
+,        ,4. Able to solve client query
+,,
+Skills and Knowledge Growth,Agile Practices ,This KPI is to see if the complete procedure of agile is followed or not which includes:
+,        ,1. Proper Updates in calls
+,        ,2. Attending the sprint meetings
+,        ,3. Checking if feedback is implemented from the previous sprint or not.
+,        ,4. Documentation
+,,
+Skills and Knowledge Growth,Understanding the specifications / story / features ,This KPI is to check if the requirement is understood properly or not:
+,        ,1. Story understanding
+,        ,2. Questioning on the approach to solving problems
+,        ,3. Suggestions/ Improvement comments
+,        ,4. Able to giving rough estimation on assigned feature
+,,
+Skills and Knowledge Growth,Technology / Knowledge of Open Source Libraries ,1. Able to read proper documentation of framework/Library
+,        ,2. Basic awareness about other than core stack
+,        ,3. Able to make use of right library/framework to accomplish task/feature. 
+,        ,4. Open Source contribution (Reporting bug/issue/ creating pull request) 
+,        ,5. Reading and Publishing blogs 
+,        ,6. Sharing Knowledge with the team.
+,        ,
+Attitude Fitment,Coding Best Practices ,This KPI is to check whether the coding practices are used or not. 
+,        ,1. Whether H cases are used or not 
+,        ,2. Researched 10 coding practices
+,     ,
+Attitude Fitment,Contribution to ScaleReal's growth ,This is to check whether the Engineers are contributing significantly to ScaleReal’s Growth or not. This KPI can include: 
+,        ,1. Client Relations 
+,        ,2. Budgeting and forecasting 
+,        ,3. Planning of projects and problems 
+,        ,4. Finding opportunities and explications for the business
+,        ,5. Systems and operations support 
+,        ,"6. Help in hiring (tips, sourcing, interviews, etc)"
+,        ,7. Help in overall ScaleReal’s activities
+,,
+Attitude Fitment,Client and peer feedback ,This is to check whether the employee is taking the client’s feedback or peer's feedback and implementing it properly:
+,        ,1. On-Time Feedback
+,        ,2. Work on Feedback as soon as you receive it.
+,        ,3. Showing results on time

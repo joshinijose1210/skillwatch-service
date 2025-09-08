@@ -1,0 +1,1 @@
+SELECT MAX(department_id) as max_id FROM departments WHERE organisation_id = :organisationId;

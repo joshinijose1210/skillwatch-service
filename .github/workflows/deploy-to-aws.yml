@@ -1,0 +1,84 @@
+on:
+  push:
+    branches:
+      - scalereal
+      
+permissions:
+      id-token: write
+      contents: read
+
+jobs:
+  Building:
+    runs-on: amateur-mega-disks
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::251084732510:role/github_oidc_role
+          aws-region: us-west-2
+          role-session-name: oidc_github
+
+      - name: Set Release Tag
+        id: release-tag
+        shell: bash
+        run: |
+          PREVIOUS_TAG=$(aws ssm get-parameter --name  "/skillwatch/prod/RELEASE_TAG" --region us-west-2 | jq -r ".Parameter.Value")
+          echo "tag=$((++PREVIOUS_TAG))" >> $GITHUB_OUTPUT
+          aws ssm put-parameter --name "/skillwatch/prod/RELEASE_TAG" --type "String" --overwrite --value "$PREVIOUS_TAG"
+          
+      - run: aws sts get-caller-identity
+          
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: pta-docker-images
+          IMAGE_TAG: ${{ steps.release-tag.outputs.tag }}
+        run: |
+          export DOCKER_BUILDKIT=1
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          
+
+  Deploying:
+    needs: Building
+    runs-on: amateur-mega-disks
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::251084732510:role/github_oidc_role
+          aws-region: us-west-2
+          role-session-name: oidc_github
+
+      - name: Get Release Tag
+        id: release-tag
+        run: |
+          RELEASE_TAG=$(aws ssm get-parameter --name  "/skillwatch/prod/RELEASE_TAG" --region us-west-2 | jq -r ".Parameter.Value")
+          echo "tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Set secrets.yml from Github Secret
+        run: echo "${{ secrets.ANSIBLE_SECRETS }}" | openssl enc -d -base64 | tee secrets.yml
+
+      - name: Deploying the PTA Backend Container
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: backend_deploy.yml
+          directory: ${{ vars.GITHUB_WORKSPACE }}
+          key: ${{ secrets.PTA_SSH }}
+          inventory: |
+            pta_server:
+              hosts:
+                vars:
+                  ansible_host: 35.83.177.74
+                  ansible_user: ${{ secrets.PTA_USERNAME }}
+                  image_tag: ${{ steps.release-tag.outputs.tag }}

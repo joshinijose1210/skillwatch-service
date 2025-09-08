@@ -1,0 +1,2501 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet dbms="postgresql" id="create-users-table" author="gn">
+    <sqlFile path="sql/ddl/01-create-users.sql" encoding="UTF-8"/>
+  </changeSet>
+  <changeSet dbms="postgresql" id="create-refresh-tokens-table" author="gn">
+    <sqlFile path="sql/ddl/02-create-refresh-tokens.sql" encoding="UTF-8"/>
+  </changeSet>
+  <changeSet dbms="postgresql" id="employee_feedbacks-table" author="RS">
+    <sql>
+      CREATE TABLE employee_feedbacks (
+      sr_no BIGSERIAL PRIMARY KEY,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      feedback VARCHAR,
+      feedback_to VARCHAR NOT NULL,
+      feedback_from VARCHAR NOT NULL
+      );
+    </sql>
+  </changeSet>
+  <changeSet dbms="postgresql" id="employees-table" author="RS">
+    <sql>
+      CREATE TABLE employees (
+      sr_no BIGSERIAL PRIMARY KEY,
+      emp_id VARCHAR NOT NULL,
+      first_name VARCHAR,
+      last_name VARCHAR
+      );
+    </sql>
+  </changeSet>
+  <changeSet dbms="postgresql" id="tags-table" author="RS">
+    <sql>
+      CREATE TABLE tags (
+      sr_no INT PRIMARY KEY,
+      tag VARCHAR NOT NULL
+      );
+    </sql>
+  </changeSet>
+  <changeSet dbms="postgresql" id="alter-employee_feedbacks-table" author="RS">
+    <sql>
+      ALTER TABLE employee_feedbacks ADD tag VARCHAR;
+    </sql>
+  </changeSet>
+  <changeSet dbms="postgresql" id="alter-employee_feedbacks" author="RS">
+    <sql>
+      ALTER TABLE employee_feedbacks
+      RENAME TO feedbacks;
+    </sql>
+  </changeSet>
+  <changeSet dbms="postgresql" id="alter-employees-table" author="gp">
+    <sql>
+      ALTER TABLE employees ADD email_id VARCHAR UNIQUE NOT NULL,
+      ADD contact_no BIGINT UNIQUE NOT NULL,ADD UNIQUE (emp_id);
+    </sql>
+  </changeSet>
+  <changeSet dbms="postgresql" id="alter-parameters" author="RS">
+    <sql>
+      ALTER TABLE feedbacks ALTER COLUMN feedback SET NOT NULL, ALTER COLUMN tag SET NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="alter-employees" author="">
+    <sql>
+      ALTER TABLE employees ALTER COLUMN first_name SET NOT NULL,
+      ALTER COLUMN last_name SET NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="alter-employees-empId-contact_no" author="">
+    <sql>
+      ALTER TABLE employees ALTER COLUMN emp_id DROP NOT NULL, ALTER COLUMN contact_no DROP NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet dbms="postgresql" id="create-role-table" author="RS">
+    <sql>
+      CREATE TABLE roles(
+      role_id VARCHAR NOT NULL UNIQUE,
+      role_name VARCHAR UNIQUE NOT NULL,
+      status BOOLEAN NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="create-table-teams" author="MA">
+    <sql>
+      CREATE TABLE teams(
+      team_id VARCHAR PRIMARY KEY,
+      team_name VARCHAR UNIQUE NOT NULL,
+      team_status BOOLEAN NOT NULL,
+      team_created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      team_updated_at TIMESTAMPTZ
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="create-designations-table" author="gp">
+    <sql>
+      CREATE TABLE designations(
+      designation_id VARCHAR NOT NULL UNIQUE,
+      designation_name VARCHAR UNIQUE NOT NULL,
+      status BOOLEAN NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="alter-employees-status" author="UA">
+    <sql>
+      ALTER TABLE employees ADD status BOOLEAN,
+      ADD team VARCHAR,
+      ADD designation VARCHAR,
+      ADD role VARCHAR;
+    </sql>
+  </changeSet>
+  <changeSet id="create-kra-table" author="MA">
+    <sql>
+      CREATE TABLE kra(
+      kra_id BIGSERIAL PRIMARY KEY,
+      title VARCHAR NOT NULL,
+      description VARCHAR NOT NULL,
+      status BOOLEAN NOT NULL
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="create-kra-mapping-table" author="MA">
+    <sql>
+      CREATE TABLE kra_teams_mappings(
+      kra_id BIGINT NOT NULL,
+      team_id VARCHAR NOT NULL,
+      FOREIGN KEY(kra_id) REFERENCES kra(kra_id),
+      FOREIGN KEY(team_id) REFERENCES teams(team_id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="review-cycle-table" author="gp">
+    <sql>
+      CREATE TABLE review_cycle(
+      id BIGINT NOT NULL,
+      start_date DATE NOT NULL,
+      end_date Date NOT NULL,
+      publish BOOLEAN NOT NULL
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="alter-employees" author="gp">
+    <sql>
+      ALTER TABLE employees
+      DROP COLUMN team,
+      DROP COLUMN designation,
+      DROP COLUMN role;
+    </sql>
+  </changeSet>
+  <changeSet id="alter-role-id" author="gp">
+    <sql>
+      ALTER TABLE roles
+      ADD PRIMARY KEY(role_id);
+    </sql>
+  </changeSet>
+  <changeSet id="alter-designation-id" author="gp">
+    <sql>
+      ALTER TABLE designations
+      ADD PRIMARY KEY(designation_id);
+    </sql>
+  </changeSet>
+  <changeSet id="alter-empId" author="gp">
+    <sql>
+      ALTER TABLE employees ALTER COLUMN emp_id SET NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="employees-team-mapping" author="gp">
+    <sql>
+      CREATE TABLE employees_team_mapping(
+      emp_id VARCHAR NOT NULL,
+      team_id VARCHAR NOT NULL,
+      FOREIGN KEY(emp_id) REFERENCES employees(emp_id),
+      FOREIGN KEY(team_id) REFERENCES teams(team_id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="employees-role-mapping" author="gp">
+    <sql>
+      CREATE TABLE employees_role_mapping(
+      emp_id VARCHAR NOT NULL,
+      role_id VARCHAR NOT NULL,
+      FOREIGN KEY(emp_id) REFERENCES employees(emp_id),
+      FOREIGN KEY(role_id) REFERENCES roles(role_id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="employees-designation-mapping" author="gp">
+    <sql>
+      CREATE TABLE employees_designation_mapping(
+      emp_id VARCHAR NOT NULL,
+      designation_id VARCHAR NOT NULL,
+      FOREIGN KEY(emp_id) REFERENCES employees(emp_id),
+      FOREIGN KEY(designation_id) REFERENCES designations(designation_id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="employee-manager-mapping" author="MA">
+    <sql>
+      CREATE TABLE employee_manager_mapping(
+      emp_id VARCHAR NOT NULL,
+      first_manager_id VARCHAR NOT NULL,
+      second_manager_id VARCHAR,
+      FOREIGN KEY(emp_id) REFERENCES employees(emp_id),
+      FOREIGN KEY(first_manager_id) REFERENCES employees(emp_id),
+      FOREIGN KEY(second_manager_id) REFERENCES employees(emp_id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="drop-review_cycle" author="gp">
+    <sql>
+      DROP TABLE review_cycle;
+    </sql>
+  </changeSet>
+  <changeSet id="create-review-cycle" author="gp">
+    <sql>
+      CREATE TABLE review_cycle(
+      id BIGSERIAL PRIMARY KEY,
+      start_date DATE UNIQUE NOT NULL,
+      end_date Date UNIQUE NOT NULL,
+      publish BOOLEAN NOT NULL,
+      last_modified  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="review" author="UA">
+    <sql>
+      CREATE TABLE review(
+      id BIGSERIAL PRIMARY KEY,
+      review_cycle_id BIGINT,
+      kra_id BIGINT,
+      review_to VARCHAR NOT NULL,
+      review_from VARCHAR,
+      review VARCHAR,
+      rating INT NOT NULL CHECK(rating > 0),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      draft BOOLEAN,
+      published BOOLEAN,
+      FOREIGN KEY(review_cycle_id) REFERENCES review_cycle(id),
+      FOREIGN KEY(kra_id) REFERENCES kra(kra_id),
+      FOREIGN KEY(review_to) REFERENCES employees(emp_id),
+      FOREIGN KEY(review_from) REFERENCES employees(emp_id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet dbms="postgresql" id="alter-table-roles" author="RS">
+  <sql>
+    DELETE FROM employees_role_mapping;
+  </sql>
+  <sql>
+    DELETE FROM roles;
+  </sql>
+  <sql>
+    ALTER TABLE employees_role_mapping
+    DROP CONSTRAINT employees_role_mapping_role_id_fkey;
+  </sql>
+  <sql>
+    DROP TABLE roles;
+  </sql>
+  <sql>
+    ALTER TABLE employees_role_mapping
+    ALTER COLUMN role_id TYPE BIGINT USING role_id::BIGINT;
+  </sql>
+  <sql>
+    CREATE TABLE roles(
+    id BIGSERIAL PRIMARY KEY,
+    role_name VARCHAR UNIQUE NOT NULL,
+    status BOOLEAN NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ
+    );
+  </sql>
+  <sql>
+    ALTER TABLE employees_role_mapping
+    ADD CONSTRAINT employees_role_mapping_id_fkey
+    FOREIGN KEY (role_id)
+    REFERENCES roles (id);
+  </sql>
+</changeSet>
+  <changeSet dbms="postgresql" id="alter-table-designations" author="RS">
+    <sql>
+      DELETE FROM employees_designation_mapping;
+    </sql>
+    <sql>
+      DELETE FROM designations;
+    </sql>
+    <sql>
+      ALTER TABLE employees_designation_mapping
+      DROP CONSTRAINT employees_designation_mapping_designation_id_fkey;
+    </sql>
+    <sql>
+      DROP TABLE designations;
+    </sql>
+    <sql>
+      ALTER TABLE employees_designation_mapping
+      ALTER COLUMN designation_id TYPE BIGINT USING designation_id::BIGINT;
+    </sql>
+    <sql>
+      CREATE TABLE designations(
+      id BIGSERIAL PRIMARY KEY,
+      designation_name VARCHAR UNIQUE NOT NULL,
+      status BOOLEAN NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ
+      );
+    </sql>
+    <sql>
+      ALTER TABLE employees_designation_mapping
+      ADD CONSTRAINT employees_designation_mapping_id_fkey
+      FOREIGN KEY (designation_id)
+      REFERENCES designations (id);
+    </sql>
+  </changeSet>
+  <changeSet dbms="postgresql" id="alter-table-teams" author="RS">
+    <sql>
+      DELETE FROM employees_team_mapping;
+    </sql>
+    <sql>
+      DELETE FROM kra_teams_mappings;
+    </sql>
+    <sql>
+      DELETE FROM teams;
+    </sql>
+    <sql>
+      ALTER TABLE employees_team_mapping
+      DROP CONSTRAINT employees_team_mapping_team_id_fkey;
+    </sql>
+    <sql>
+      ALTER TABLE kra_teams_mappings
+      DROP CONSTRAINT kra_teams_mappings_team_id_fkey;
+    </sql>
+    <sql>
+      DROP TABLE teams;
+    </sql>
+    <sql>
+      ALTER TABLE employees_team_mapping
+      ALTER COLUMN team_id TYPE BIGINT USING team_id::BIGINT;
+    </sql>
+    <sql>
+      ALTER TABLE kra_teams_mappings
+      ALTER COLUMN team_id TYPE BIGINT USING team_id::BIGINT;
+    </sql>
+    <sql>
+      CREATE TABLE teams(
+      id BIGSERIAL PRIMARY KEY,
+      team_name VARCHAR UNIQUE NOT NULL,
+      status BOOLEAN NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ
+      );
+    </sql>
+    <sql>
+      ALTER TABLE employees_team_mapping
+      ADD CONSTRAINT employees_team_mapping_id_fkey
+      FOREIGN KEY (team_id)
+      REFERENCES teams (id);
+    </sql>
+    <sql>
+      ALTER TABLE kra_teams_mappings
+      ADD CONSTRAINT kra_teams_mappings_id_fkey
+      FOREIGN KEY (team_id)
+      REFERENCES teams (id);
+    </sql>
+  </changeSet>
+  <changeSet id="alter-table-review-cycle" author="gp">
+    <sql>
+      ALTER TABLE review_cycle ADD self_review_start_date DATE NOT NULL, ADD self_review_end_date DATE NOT NULL,
+      ADD manager_review_start_date DATE NOT NULL, ADD manager_review_end_date DATE NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="alter-tag" author="">
+    <sql>
+      DELETE FROM tags;
+    </sql>
+    <sql>
+      DELETE FROM feedbacks;
+    </sql>
+    <sql>
+      ALTER TABLE feedbacks DROP COLUMN tag;
+    </sql>
+    <sql>
+      DROP TABLE tags;
+    </sql>
+    <sql>
+      CREATE TABLE tags(
+      id SERIAL PRIMARY KEY,
+      name VARCHAR UNIQUE NOT NULL
+      );
+    </sql>
+    <sql>
+      ALTER TABLE feedbacks
+      ADD COLUMN tag_id INT NOT NULL,
+      ADD CONSTRAINT feedbacks_id_fkey
+      FOREIGN KEY (tag_id)
+      REFERENCES tags (id);;
+    </sql>
+  </changeSet>
+  <changeSet id="role-table-constraint-added" author="RS">
+    <sql>
+      CREATE UNIQUE INDEX unique_role_name ON roles (LOWER(role_name));
+    </sql>
+  </changeSet>
+  <changeSet id="team-table-constraint-added" author="MA">
+    <sql>
+      CREATE UNIQUE INDEX unique_team_name ON teams (LOWER(team_name));
+    </sql>
+  </changeSet>
+  <changeSet id="alter-table-designations" author="gp">
+      <sql>
+        CREATE UNIQUE INDEX unique_designation_name ON designations (LOWER(designation_name));
+      </sql>
+  </changeSet>
+  <changeSet id="add-constraint-review-cycle" author="gp">
+    <sql>
+      ALTER TABLE review_cycle
+      add constraint no_overlap
+      EXCLUDE USING GIST (daterange(review_cycle.start_date , review_cycle.end_date) WITH &amp;&amp;) ;
+    </sql>
+  </changeSet>
+  <changeSet id="alter-employee-table" author="RS">
+    <sql>
+      ALTER TABLE employees ALTER COLUMN contact_no SET NOT NULL,
+      ALTER COLUMN status SET NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="employee-unique-constraint-added" author="RS">
+    <sql>
+      CREATE UNIQUE INDEX unique_email_id ON employees (LOWER(email_id));
+    </sql>
+  </changeSet>
+  <changeSet id="create-review-details-table" author="ua">
+    <sql>
+      CREATE TABLE review_details(
+      id BIGSERIAL PRIMARY KEY,
+      review_cycle_id BIGINT,
+      review_to VARCHAR,
+      review_from VARCHAR,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      draft BOOLEAN,
+      published BOOLEAN,
+      FOREIGN KEY(review_cycle_id) REFERENCES review_cycle(id),
+      FOREIGN KEY(review_to) REFERENCES employees(emp_id),
+      FOREIGN KEY(review_from) REFERENCES employees(emp_id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="reviews" author="ua">
+    <sql>DROP TABLE review</sql>
+    <sql>
+      CREATE TABLE reviews(
+      id BIGSERIAL PRIMARY KEY,
+      review_details_id BIGINT,
+      kra_id BIGINT,
+      review VARCHAR,
+      rating INT,
+      FOREIGN KEY(review_details_id) REFERENCES review_details(id),
+      FOREIGN KEY(kra_id) REFERENCES kra(kra_id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="roles-permissions" author="MA">
+    <sql>
+      CREATE TABLE modules(
+      id SERIAL PRIMARY KEY,
+      name VARCHAR UNIQUE NOT NULL
+      );
+    </sql>
+    <sql>
+      CREATE TABLE module_permissions(
+      role_id BIGINT,
+      module_id INT,
+      view BOOLEAN,
+      edit BOOLEAN,
+      FOREIGN KEY(role_id) REFERENCES roles(id),
+      FOREIGN KEY(module_id) REFERENCES modules(id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="create-review-type-table-alter-review-details-table" author="RS">
+    <sql>
+      CREATE TABLE review_types (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR UNIQUE NOT NULL
+      );
+    </sql>
+    <sql>
+      ALTER TABLE review_details
+      ADD COLUMN review_type_id INT NOT NULL,
+      ADD CONSTRAINT review_details_id_fkey
+      FOREIGN KEY (review_type_id)
+      REFERENCES review_types(id);
+    </sql>
+  </changeSet>
+  <changeSet id="alter-review-details-table" author="RS">
+    <sql>
+      ALTER TABLE review_details ALTER COLUMN updated_at DROP NOT NULL
+    </sql>
+  </changeSet>
+  <changeSet id="action-items-and-goals" author="RS">
+    <sql>
+      CREATE TABLE action_items(
+      id BIGSERIAL PRIMARY KEY,
+      review_details_id BIGINT,
+      action_item VARCHAR,
+      is_completed BOOLEAN,
+      FOREIGN KEY(review_details_id) REFERENCES review_details(id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="review-cycle-unique-constraints" author="MA">
+    <sql>
+      CREATE UNIQUE INDEX ON
+      review_cycle(publish)
+      WHERE publish = true ;
+    </sql>
+  </changeSet>
+  <changeSet id="add-check-in-dates" author="GP">
+    <sql>
+      ALTER TABLE review_cycle
+      ADD COLUMN check_in_start_date DATE,
+      ADD COLUMN check_in_end_date DATE;
+    </sql>
+    <sql>
+      UPDATE review_cycle
+      SET check_in_start_date = manager_review_end_date,
+      check_in_end_date = end_date;
+    </sql>
+    <sql>
+      ALTER TABLE review_cycle
+      ALTER COLUMN check_in_start_date SET NOT NULL,
+      ALTER COLUMN check_in_end_date SET NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="add-column-password" author="RS">
+    <sql>
+      ALTER TABLE employees
+      ADD COLUMN password VARCHAR;
+    </sql>
+  </changeSet>
+  <changeSet id="company-table" author="RS">
+    <sql>
+      CREATE TABLE company (
+      sr_no SERIAL PRIMARY KEY,
+      org_admin_id BIGINT,
+      company_name VARCHAR NOT NULL,
+      FOREIGN KEY(org_admin_id) REFERENCES employees(sr_no)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="alter-refresh-tokens" author="MA">
+    <sql>
+      ALTER TABLE refresh_tokens
+      DROP CONSTRAINT refresh_tokens_user_id_fkey;
+    </sql>
+    <sql>
+      ALTER TABLE refresh_tokens
+      ALTER COLUMN user_id TYPE BIGINT USING user_id::BIGINT;
+    </sql>
+    <sql>
+      ALTER TABLE refresh_tokens
+      ADD CONSTRAINT refresh_tokens_user_id_fkey
+      FOREIGN KEY (user_id)
+      REFERENCES employees(sr_no);
+    </sql>
+  </changeSet>
+  <changeSet id="alter-employee-table" author="GP">
+    <sql>
+      ALTER TABLE employees
+      ADD COLUMN onboarding_flow BOOLEAN NOT NULL DEFAULT false;
+    </sql>
+  </changeSet>
+  <changeSet id="alter-employee-table-column-name" author="RS">
+    <sql>
+      ALTER TABLE employees
+      RENAME COLUMN sr_no TO id;
+    </sql>
+  </changeSet>
+  <changeSet id="alter-employees-designation-mapping" author="RS">
+    <sql>
+      DELETE FROM employees_designation_mapping;
+    </sql>
+    <sql>
+      ALTER TABLE employees_designation_mapping
+      DROP CONSTRAINT employees_designation_mapping_emp_id_fkey;
+    </sql>
+    <sql>
+      ALTER TABLE employees_designation_mapping
+      ALTER COLUMN emp_id TYPE BIGINT USING emp_id::BIGINT;
+    </sql>
+    <sql>
+      ALTER TABLE employees_designation_mapping
+      ADD CONSTRAINT employees_designation_mapping_emp_id_fkey
+      FOREIGN KEY (emp_id)
+      REFERENCES employees(id);
+    </sql>
+  </changeSet>
+  <changeSet id="alter-employees-team-mapping" author="RS">
+    <sql>
+      DELETE FROM employees_team_mapping;
+    </sql>
+    <sql>
+      ALTER TABLE employees_team_mapping
+      DROP CONSTRAINT employees_team_mapping_emp_id_fkey;
+    </sql>
+    <sql>
+      ALTER TABLE employees_team_mapping
+      ALTER COLUMN emp_id TYPE BIGINT USING emp_id::BIGINT;
+    </sql>
+    <sql>
+      ALTER TABLE employees_team_mapping
+      ADD CONSTRAINT employees_team_mapping_emp_id_fkey
+      FOREIGN KEY (emp_id)
+      REFERENCES employees(id);
+    </sql>
+  </changeSet>
+  <changeSet id="alter-employees-role-mapping" author="RS">
+    <sql>
+      DELETE FROM employees_role_mapping;
+    </sql>
+    <sql>
+      ALTER TABLE employees_role_mapping
+      DROP CONSTRAINT employees_role_mapping_emp_id_fkey;
+    </sql>
+    <sql>
+      ALTER TABLE employees_role_mapping
+      ALTER COLUMN emp_id TYPE BIGINT USING emp_id::BIGINT;
+    </sql>
+    <sql>
+      ALTER TABLE employees_role_mapping
+      ADD CONSTRAINT employees_role_mapping_emp_id_fkey
+      FOREIGN KEY (emp_id)
+      REFERENCES employees(id);
+    </sql>
+  </changeSet>
+  <changeSet id="alter-employee-manager-mapping-table" author="RS">
+    <sql>
+      DELETE FROM employee_manager_mapping;
+    </sql>
+    <sql>
+      ALTER TABLE employee_manager_mapping
+      DROP CONSTRAINT employee_manager_mapping_emp_id_fkey,
+      DROP CONSTRAINT employee_manager_mapping_first_manager_id_fkey,
+      DROP CONSTRAINT employee_manager_mapping_second_manager_id_fkey;
+    </sql>
+    <sql>
+      ALTER TABLE employee_manager_mapping
+      ALTER COLUMN emp_id TYPE BIGINT USING emp_id::BIGINT,
+      ALTER COLUMN first_manager_id TYPE BIGINT USING first_manager_id::BIGINT,
+      ALTER COLUMN second_manager_id TYPE BIGINT USING second_manager_id::BIGINT;
+    </sql>
+    <sql>
+      ALTER TABLE employee_manager_mapping
+      ADD CONSTRAINT employee_manager_mapping_emp_id_fkey FOREIGN KEY (emp_id) REFERENCES employees(id),
+      ADD CONSTRAINT employee_manager_mapping_first_manager_id_fkey FOREIGN KEY (first_manager_id) REFERENCES employees(id),
+      ADD CONSTRAINT employee_manager_mapping_second_manager_id_fkey FOREIGN KEY (second_manager_id) REFERENCES employees(id);
+    </sql>
+  </changeSet>
+  <changeSet id="alter-feedbacks-table" author="RS">
+    <sql>
+      DELETE FROM feedbacks;
+    </sql>
+    <sql>
+      ALTER TABLE feedbacks
+      ALTER COLUMN feedback_to TYPE BIGINT USING feedback_to::BIGINT,
+      ALTER COLUMN feedback_from TYPE BIGINT USING feedback_from::BIGINT;
+    </sql>
+  </changeSet>
+  <changeSet id="alter-review-detail-table" author="RS">
+    <sql>
+      DELETE FROM reviews;
+    </sql>
+    <sql>
+      DELETE FROM action_items;
+    </sql>
+    <sql>
+      DELETE FROM review_details;
+    </sql>
+    <sql>
+      ALTER TABLE review_details
+      DROP CONSTRAINT review_details_review_to_fkey,
+      DROP CONSTRAINT review_details_review_from_fkey;
+    </sql>
+    <sql>
+      ALTER TABLE review_details
+      ALTER COLUMN review_to TYPE BIGINT USING review_to::BIGINT,
+      ALTER COLUMN review_from TYPE BIGINT USING review_from::BIGINT;
+    </sql>
+    <sql>
+      ALTER TABLE review_details
+      ADD CONSTRAINT review_details_review_to_fkey FOREIGN KEY(review_to) REFERENCES employees(id),
+      ADD CONSTRAINT review_details_review_from_fkey FOREIGN KEY (review_from) REFERENCES employees(id);
+    </sql>
+  </changeSet>
+  <changeSet id="delete-employees" author="RS">
+    <sql>
+      DELETE FROM refresh_tokens;
+    </sql>
+    <sql>
+      DELETE FROM company;
+    </sql>
+    <sql>
+      DELETE FROM employees;
+    </sql>
+  </changeSet>
+  <changeSet id="alter-table-company-to-organisations" author="UA">
+    <sql>ALTER TABLE company RENAME TO organisations</sql>
+    <sql>ALTER TABLE organisations RENAME COLUMN org_admin_id TO admin_id</sql>
+    <sql>ALTER TABLE organisations RENAME COLUMN company_name TO name</sql>
+  </changeSet>
+  <changeSet id="alter-table-designations" author="UA">
+    <sql>ALTER TABLE designations RENAME COLUMN id to sr_no</sql>
+    <sql>
+      ALTER TABLE designations
+      ADD COLUMN id BIGINT,
+      ADD COLUMN organisation_id BIGINT REFERENCES organisations(sr_no)
+    </sql>
+    <sql>
+      UPDATE designations SET id = sr_no, organisation_id = 1;
+    </sql>
+    <sql>
+      ALTER TABLE designations
+      ALTER COLUMN id SET NOT NULL,
+      ALTER COLUMN organisation_id SET NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="alter-table-teams-add-organisation-id" author="UA">
+    <sql>ALTER TABLE teams DROP CONSTRAINT teams_team_name_key;</sql>
+    <sql>DROP INDEX unique_team_name;</sql>
+    <sql>ALTER TABLE teams RENAME COLUMN id to sr_no;</sql>
+    <sql>
+      ALTER TABLE teams
+      ADD COLUMN id BIGINT,
+      ADD COLUMN organisation_id BIGINT REFERENCES organisations(sr_no);
+    </sql>
+    <sql>UPDATE teams SET id = sr_no, organisation_id = 1;</sql>
+    <sql>
+      ALTER TABLE teams
+      ALTER COLUMN id SET NOT NULL,
+      ALTER COLUMN organisation_id SET NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="alter-table-designation-drop-unique-name" author="UA">
+    <sql>ALTER TABLE designations DROP CONSTRAINT designations_designation_name_key;</sql>
+    <sql>DROP INDEX unique_designation_name;</sql>
+  </changeSet>
+  <changeSet id="alter-table-kra-organisation-id" author="UA">
+    <sql>ALTER TABLE kra RENAME COLUMN kra_id to id;</sql>
+    <sql>
+      ALTER TABLE kra
+      ADD COLUMN kra_id BIGINT,
+      ADD COLUMN organisation_id BIGINT REFERENCES organisations(sr_no);
+    </sql>
+    <sql>UPDATE kra SET kra_id = id, organisation_id = 1;</sql>
+    <sql>
+      ALTER TABLE kra
+      ALTER COLUMN kra_id SET NOT NULL,
+      ALTER COLUMN organisation_id SET NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="add-organisation-id-column" author="RS">
+    <sql>
+      ALTER TABLE employees
+      DROP CONSTRAINT employees_emp_id_key;
+    </sql>
+    <sql>
+      ALTER TABLE organisations
+      DROP CONSTRAINT company_org_admin_id_fkey;
+    </sql>
+    <sql>
+      ALTER TABLE employees
+      ADD COLUMN organisation_id BIGINT REFERENCES organisations(sr_no);
+    </sql>
+    <sql>
+      UPDATE employees SET organisation_id = 1;
+    </sql>
+    <sql>
+      ALTER TABLE employees
+      ALTER COLUMN organisation_id SET NOT NULL;
+    </sql>
+    <sql>
+      CREATE UNIQUE INDEX idx_emp_id_org_id ON employees (LOWER(emp_id), organisation_id);
+    </sql>
+  </changeSet>
+  <changeSet id="designation-unique-name-index" author="RS">
+    <sql>
+      CREATE UNIQUE INDEX unique_designation_name_org_id ON designations (LOWER(designation_name), organisation_id);
+    </sql>
+  </changeSet>
+  <changeSet id="alter-table-review-cycle-add-organisation-id" author="MA">
+    <sql> ALTER TABLE review_cycle DROP CONSTRAINT review_cycle_end_date_key; </sql>
+    <sql> ALTER TABLE review_cycle DROP CONSTRAINT review_cycle_start_date_key;</sql>
+    <sql> DROP INDEX review_cycle_publish_idx;</sql>
+    <sql> ALTER TABLE review_cycle DROP CONSTRAINT no_overlap;</sql>
+    <sql> ALTER TABLE review_cycle ADD COLUMN organisation_id BIGINT REFERENCES organisations(sr_no);</sql>
+    <sql> UPDATE review_cycle SET organisation_id = 1;</sql>
+    <sql> ALTER TABLE review_cycle ALTER COLUMN organisation_id SET NOT NULL;</sql>
+    <sql>CREATE EXTENSION btree_gist;</sql>
+    <sql>
+      ALTER TABLE review_cycle
+      add constraint no_overlap_org
+      EXCLUDE USING GIST (
+      organisation_id WITH =,
+      daterange(review_cycle.start_date , review_cycle.end_date) WITH &amp;&amp;
+      ) ;
+    </sql>
+    <sql>
+      CREATE UNIQUE INDEX ON review_cycle (organisation_id, publish)
+      WHERE publish = true;
+    </sql>
+  </changeSet>
+  <changeSet id="alter-table-roles-add-organisation" author="UA">
+    <sql>ALTER TABLE roles DROP CONSTRAINT roles_role_name_key;</sql>
+    <sql>DROP INDEX unique_role_name;</sql>
+    <sql>
+      ALTER TABLE roles
+      ADD COLUMN role_id BIGINT,
+      ADD COLUMN organisation_id BIGINT REFERENCES organisations(sr_no);
+    </sql>
+    <sql>UPDATE roles SET role_id = id, organisation_id = 1;</sql>
+    <sql>
+      ALTER TABLE roles
+      ALTER COLUMN role_id SET NOT NULL,
+      ALTER COLUMN organisation_id SET NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="alter-teams-column-name" author="UA">
+    <sql>ALTER TABLE teams RENAME COLUMN id to team_id</sql>
+    <sql>ALTER TABLE teams RENAME COLUMN sr_no to id</sql>
+  </changeSet>
+  <changeSet id="alter-designations-column-name" author="UA">
+    <sql>ALTER TABLE designations RENAME COLUMN id to designation_id</sql>
+    <sql>ALTER TABLE designations RENAME COLUMN sr_no to id</sql>
+  </changeSet>
+  <changeSet id="add-organisation-status" author="MA">
+    <sql>ALTER TABLE organisations ADD COLUMN is_active BOOLEAN</sql>
+    <sql>UPDATE organisations SET is_active = true</sql>
+    <sql>ALTER TABLE organisations ALTER COLUMN is_active SET NOT NULL</sql>
+  </changeSet>
+  <changeSet id="add-average-rating" author="MA">
+    <sql>
+      ALTER TABLE review_details ADD COLUMN average_rating DECIMAL(10,2)
+    </sql>
+  </changeSet>
+  <changeSet id="create-table-review-manager-mapping" author="UA">
+    <sql>
+      CREATE TABLE review_manager_mapping(
+      sr_no BIGSERIAL PRIMARY KEY,
+      review_details_id BIGINT,
+      first_manager_id BIGINT,
+      second_manager_id BIGINT,
+      FOREIGN KEY(review_details_id) REFERENCES review_details(id),
+      FOREIGN KEY(first_manager_id) REFERENCES employees(id),
+      FOREIGN KEY(second_manager_id) REFERENCES employees(id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="organisation-domain-mapping" author="RS">
+    <sql>
+      CREATE TABLE organisation_domain_mapping(
+      sr_no BIGSERIAL PRIMARY KEY,
+      organisation_id BIGINT NOT NULL,
+      allowed_domain VARCHAR NOT NULL,
+      FOREIGN KEY(organisation_id) REFERENCES organisations(sr_no)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="10" author="MA">
+    <sql> ALTER TABLE users RENAME COLUMN username TO email_Id </sql>
+    <sql> ALTER TABLE users ALTER COLUMN first_name SET NOT NULL, ALTER COLUMN last_name SET NOT NULL</sql>
+  </changeSet>
+  <changeSet id="11" author="MA">
+    <sql>ALTER TABLE organisations ADD COLUMN organisation_size INT</sql>
+    <sql>UPDATE organisations SET organisation_size = 50</sql>
+    <sql>ALTER TABLE organisations ALTER COLUMN organisation_size SET NOT NULL</sql>
+  </changeSet>
+  <changeSet id="User-Activity-table" author="RS">
+    <sql>
+      CREATE TABLE user_activity(
+      sr_no BIGSERIAL PRIMARY KEY,
+      employee_id BIGINT NOT NULL,
+      module_id BIGINT NOT NULL,
+      activity VARCHAR NOT NULL,
+      description VARCHAR NOT NULL,
+      ip_address VARCHAR NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      FOREIGN KEY(employee_id) REFERENCES employees(id),
+      FOREIGN KEY(module_id) REFERENCES modules(id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="12" author="MA">
+    <sql>ALTER TABLE organisations ADD COLUMN logo BYTEA</sql>
+  </changeSet>
+  <changeSet id="13" author="YJ">
+    <sql>
+      CREATE TABLE link_details(
+      id VARCHAR PRIMARY KEY,
+      generation_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      no_of_hit INT NOT NULL,
+      purpose VARCHAR NOT NULL
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="14" author="MA">
+    <sql>
+      ALTER TABLE employees ALTER COLUMN contact_no TYPE VARCHAR
+    </sql>
+    <sql>
+      UPDATE employees
+      SET contact_no = CONCAT('+91', contact_no)
+    </sql>
+  </changeSet>
+  <changeSet id="create-table-feedback-request" author="UA">
+    <sql>
+      CREATE TABLE feedback_request(
+      id BIGSERIAL PRIMARY KEY,
+      requested_by BIGINT NOT NULL,
+      feedback_to BIGINT NOT NULL,
+      feedback_from BIGINT NOT NULL,
+      request VARCHAR,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      submitted BOOLEAN,
+      FOREIGN KEY(requested_by) REFERENCES employees(id),
+      FOREIGN KEY(feedback_to) REFERENCES employees(id),
+      FOREIGN KEY(feedback_from) REFERENCES employees(id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="alter-table-feedback-add-request-id" author="UA">
+    <sql>
+      ALTER TABLE feedbacks ADD COLUMN request_id BIGINT,
+      ADD CONSTRAINT feedbacks_request_id_fkey FOREIGN KEY(request_id) REFERENCES feedback_request(id);
+    </sql>
+  </changeSet>
+  <changeSet id="Column-renamed" author="RS">
+    <sql>
+      ALTER TABLE feedback_request
+      RENAME COLUMN submitted TO is_submitted;
+    </sql>
+  </changeSet>
+  <changeSet id="15" author="YJ">
+    <sql>
+      UPDATE designations SET designation_name = 'HR Manager'
+      WHERE designation_name = 'HR manager';
+    </sql>
+  </changeSet>
+  <changeSet id="16" author="YJ">
+    <sql>
+      CREATE UNIQUE INDEX unique_teams_name_org_id ON teams (LOWER(team_name), organisation_id);
+      CREATE UNIQUE INDEX unique_roles_name_org_id ON roles (LOWER(role_name), organisation_id);
+    </sql>
+  </changeSet>
+  <changeSet id="17" author="MA">
+    <sql>
+      UPDATE modules set name = 'Reviews for Team Members' where name = 'Manager Review';
+      UPDATE modules set name = 'Check-in with Team Members' where name = 'Check In with Manager';
+      UPDATE modules set name = 'Company Information' where name = 'Configuration';
+      UPDATE modules set name = 'Review Cycles' where name = 'Review Cycle Configuration';
+      UPDATE modules set name = 'Employee Reviews' where name = 'Review Cycle';
+    </sql>
+    <sql>
+      DELETE FROM module_permissions WHERE module_id IN ( SELECT id FROM modules WHERE name = 'Submitted Feedback' );
+      DELETE FROM module_permissions WHERE module_id IN ( SELECT id FROM modules WHERE name = 'Received Feedback' );
+      DELETE FROM module_permissions WHERE module_id IN ( SELECT id FROM modules WHERE name = 'Self Review' );
+
+      DELETE FROM modules WHERE name = 'Submitted Feedback' ;
+      DELETE FROM modules WHERE name = 'Received Feedback' ;
+      DELETE FROM modules WHERE name = 'Self Review';
+    </sql>
+    <sql>
+      UPDATE module_permissions SET view = false, edit = false
+        WHERE module_id IN ( SELECT id FROM modules WHERE name = 'Employee Reviews' );
+    </sql>
+  </changeSet>
+  <changeSet id="18" author="RS">
+    <sql>
+      ALTER TABLE feedbacks
+      ADD COLUMN is_draft BOOLEAN;
+    </sql>
+    <sql>
+      UPDATE feedbacks SET is_draft = false
+    </sql>
+    <sql>
+      ALTER TABLE feedbacks ALTER COLUMN is_draft SET NOT NULL
+    </sql>
+  </changeSet>
+  <changeSet id="19" author="MA">
+    <sql>UPDATE feedbacks SET tag_id = 2 WHERE tag_id = 3 ;</sql>
+    <sql>UPDATE feedbacks SET tag_id = 3 WHERE tag_id = 4 ;</sql>
+    <sql>DELETE FROM tags where id = 4 ; </sql>
+    <sql>UPDATE tags SET name = 'Appreciation' WHERE id = 3 ;</sql>
+    <sql>UPDATE tags SET name = 'Improvement' WHERE id = 2 ;</sql>
+  </changeSet>
+  <changeSet id="20" author="MA">
+    <sql>ALTER TABLE tags RENAME TO feedback_types ;</sql>
+    <sql>ALTER TABLE feedbacks RENAME COLUMN tag_id TO feedback_type_id ;</sql>
+  </changeSet>
+  <changeSet id="21" author="MA">
+    <sql>INSERT INTO modules (name)
+      SELECT module
+      FROM (VALUES ('Request Feedback') ) AS new_modules(module)
+      LEFT JOIN modules ON new_modules.module = modules.name
+      WHERE modules.name IS NULL;</sql>
+  </changeSet>
+  <changeSet id="22" author="YJ">
+  <sql>
+  Alter table public.organisations
+  ADD Column created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+  </sql>
+  </changeSet>
+  <changeSet id="23" author="MA">
+    <sql>UPDATE modules set name = 'Feedback' where name = 'Employee Feedback';</sql>
+    <sql>UPDATE modules set name = 'Performance Review' where name = 'Employee Reviews';</sql>
+  </changeSet>
+  <changeSet id="24" author="MA">
+    <sql>ALTER TABLE feedbacks ADD COLUMN updated_at TIMESTAMPTZ ;</sql>
+    <sql>UPDATE feedbacks SET updated_at = created_at ;</sql>
+    <sql>ALTER TABLE feedbacks ALTER COLUMN updated_at SET NOT NULL;</sql>
+  </changeSet>
+  <changeSet id="26" author="RS">
+    <sql>
+      CREATE TABLE employee_manager_mapping_new (
+      emp_id BIGINT NOT NULL,
+      manager_id BIGINT NOT NULL,
+      type INT NOT NULL,
+      FOREIGN KEY(emp_id) REFERENCES employees(id),
+      FOREIGN KEY(manager_id) REFERENCES employees(id)
+      );
+    </sql>
+    <sql>
+      INSERT INTO employee_manager_mapping_new (emp_id, manager_id, type)
+      SELECT emp_id, first_manager_id, 1 FROM employee_manager_mapping;
+    </sql>
+    <sql>
+      INSERT INTO employee_manager_mapping_new (emp_id, manager_id, type)
+      SELECT emp_id, second_manager_id, 2 FROM employee_manager_mapping
+      WHERE second_manager_id IS NOT NULL;
+    </sql>
+    <sql>
+      DROP TABLE employee_manager_mapping;
+    </sql>
+    <sql>
+      ALTER TABLE employee_manager_mapping_new RENAME TO employee_manager_mapping;
+    </sql>
+  </changeSet>
+  <changeSet id="27" author="RS">
+    <sql>
+      ALTER TABLE employee_manager_mapping
+      ADD COLUMN created_at TIMESTAMP DEFAULT NOW(),
+      ADD COLUMN updated_at TIMESTAMP,
+      ADD COLUMN is_active BOOLEAN;
+    </sql>
+    <sql>
+      UPDATE employee_manager_mapping SET created_at= now(), is_active = true;
+    </sql>
+    <sql>
+      ALTER TABLE employee_manager_mapping
+      ALTER COLUMN created_at SET NOT NULL,
+      ALTER COLUMN is_active SET NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="28" author="RS">
+    <sql>
+      CREATE VIEW employees_team_mapping_view AS
+      SELECT
+      employees_team_mapping.emp_id,
+      teams.id,
+      teams.team_name,
+      teams.status,
+      teams.team_id,
+      teams.organisation_id
+      FROM
+      employees_team_mapping
+      JOIN teams ON teams.id = employees_team_mapping.team_id;
+    </sql>
+    <sql>
+      CREATE VIEW employees_role_mapping_view AS
+      SELECT
+      employees_role_mapping.emp_id,
+      roles.id,
+      roles.role_name,
+      roles.status,
+      roles.role_id,
+      roles.organisation_id
+      FROM
+      employees_role_mapping
+      JOIN roles ON roles.id = employees_role_mapping.role_id;
+    </sql>
+    <sql>
+      CREATE VIEW employees_designation_mapping_view AS
+      SELECT
+      employees_designation_mapping.emp_id,
+      designations.id,
+      designations.designation_name,
+      designations.status,
+      designations.designation_id,
+      designations.organisation_id
+      FROM
+      employees_designation_mapping
+      JOIN designations ON designations.id = employees_designation_mapping.designation_id;
+    </sql>
+    <sql>
+      CREATE VIEW employee_manager_mapping_view AS
+      SELECT
+      employee_manager_mapping.emp_id,
+      employee_manager_mapping.manager_id,
+      employees.emp_id AS manager_employee_id,
+      employees.first_name,
+      employees.last_name,
+      employee_manager_mapping.type,
+      employee_manager_mapping.created_at,
+      employee_manager_mapping.updated_at,
+      employee_manager_mapping.is_active
+      from employee_manager_mapping
+      JOIN employees ON employees.id = employee_manager_mapping.manager_id
+      WHERE is_active = true;
+    </sql>
+  </changeSet>
+  <changeSet id="29" author="RS">
+    <sql>
+      CREATE INDEX idx_employees_organisation_id ON employees (organisation_id);
+    </sql>
+    <sql>
+      CREATE INDEX idx_employees_status ON employees (status);
+    </sql>
+    <sql>
+      CREATE INDEX idx_employee_manager_mapping_emp_id ON employee_manager_mapping (emp_id);
+    </sql>
+    <sql>
+      CREATE INDEX idx_employee_manager_mapping_type ON employee_manager_mapping (type);
+    </sql>
+    <sql>
+      CREATE INDEX idx_employee_manager_mapping_is_active ON employee_manager_mapping (is_active);
+    </sql>
+    <sql>
+      CREATE INDEX idx_teams_id ON teams (id)
+    </sql>
+    <sql>
+      CREATE INDEX idx_teams_organisation_id ON teams (organisation_id)
+    </sql>
+    <sql>
+      CREATE INDEX idx_teams_status ON teams (status)
+    </sql>
+    <sql>
+      CREATE INDEX idx_roles_id ON roles (id)
+    </sql>
+    <sql>
+      CREATE INDEX idx_roles_organisation_id ON roles (organisation_id)
+    </sql>
+    <sql>
+      CREATE INDEX idx_roles_status ON roles (status)
+    </sql>
+    <sql>
+      CREATE INDEX idx_designations_id ON designations (id)
+    </sql>
+    <sql>
+      CREATE INDEX idx_designations_organisation_id ON designations (organisation_id)
+    </sql>
+    <sql>
+      CREATE INDEX idx_designations_status ON designations (status)
+    </sql>
+  </changeSet>
+  <changeSet id="30" author="MA">
+    <sql>ALTER TABLE organisations DROP COLUMN logo ;</sql>
+  </changeSet>
+  <changeSet id="31" author="UA">
+    <sql>
+      CREATE TABLE team_designation_mapping(
+      team_id BIGINT NOT NULL,
+      designation_id BIGINT NOT NULL,
+      FOREIGN KEY(team_id) REFERENCES teams(id),
+      FOREIGN KEY(designation_id) REFERENCES designations(id)
+      );
+    </sql>
+    <sql>DROP INDEX unique_designation_name_org_id;</sql>
+  </changeSet>
+  <changeSet id="32" author="MA">
+    <sql>
+      ALTER TABLE feedbacks
+      ADD CONSTRAINT feedbacks_feedback_to_fkey
+      FOREIGN KEY (feedback_to) REFERENCES employees(id);
+    </sql>
+    <sql>
+      ALTER TABLE feedbacks
+      ADD CONSTRAINT feedbacks_feedback_from_fkey
+      FOREIGN KEY (feedback_from) REFERENCES employees(id);
+    </sql>
+  </changeSet>
+  <changeSet id="33" author="MA">
+    <sql>INSERT INTO modules (name)
+      SELECT module
+      FROM (VALUES ('Allowed Domains') ) AS new_modules(module)
+      LEFT JOIN modules ON new_modules.module = modules.name
+      WHERE modules.name IS NULL;
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'true', 'true'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name = 'Org Admin'
+      AND modules.name = 'Allowed Domains';
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'true', 'false'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name = 'Human Resource'
+      AND modules.name = 'Allowed Domains';
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'false', 'false'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name NOT IN ('Org Admin', 'Human Resource')
+      AND modules.name = 'Allowed Domains';
+    </sql>
+  </changeSet>
+  <changeSet id="34" author="RS">
+    <sql>
+      ALTER TABLE kra_teams_mappings ADD COLUMN designation_id BIGINT,
+      ADD CONSTRAINT kra_teams_mappings_designation_id_fkey
+      FOREIGN KEY(designation_id) REFERENCES designations(id);
+    </sql>
+    <sql>
+      ALTER TABLE kra_teams_mappings RENAME TO kra_team_designation_mapping;
+    </sql>
+    <sql>
+      UPDATE kra_team_designation_mapping AS kt
+      SET designation_id = d.id
+      FROM kra AS k
+      JOIN designations AS d ON k.organisation_id = d.organisation_id AND d.designation_id = 2
+      AND d.status = true
+      WHERE kt.kra_id = k.id ;
+    </sql>
+    <sql>
+      ALTER TABLE kra_team_designation_mapping
+      ALTER COLUMN designation_id SET NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="35" author="RS">
+    <sql>
+      UPDATE organisation_domain_mapping
+      SET allowed_domain = CONCAT('@', allowed_domain)
+    </sql>
+  </changeSet>
+  <changeSet id="36" author="MA">
+    <sql>CREATE TABLE slack_details (
+      id BIGSERIAL,
+      organisation_id BIGINT NOT NULL,
+      access_token VARCHAR NOT NULL,
+      channel_id VARCHAR NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      FOREIGN KEY(organisation_id) REFERENCES organisations(sr_no)) ;
+    </sql>
+  </changeSet>
+  <changeSet id="37" author="RS">
+    <sql>
+      CREATE INDEX idx_review_details_review_cycle_id ON review_details (review_cycle_id);
+    </sql>
+    <sql>
+      CREATE INDEX idx_review_details_review_type_id ON review_details (review_type_id);
+    </sql>
+    <sql>
+      CREATE INDEX idx_review_details_published ON review_details (published);
+    </sql>
+    <sql>
+      CREATE INDEX idx_review_details_review_to ON review_details (review_to);
+    </sql>
+    <sql>
+      CREATE INDEX idx_review_details_review_from ON review_details (review_from);
+    </sql>
+    <sql>
+      CREATE INDEX idx_reviews_review_details_id ON reviews (review_details_id);
+    </sql>
+    <sql>
+      CREATE INDEX idx_reviews_kra_id ON reviews (kra_id);
+    </sql>
+    <sql>
+      CREATE INDEX idx_kra_organisation_id ON kra (organisation_id);
+    </sql>
+    <sql>
+      CREATE INDEX idx_kra_status ON kra (status);
+    </sql>
+    <sql>
+      CREATE INDEX idx_action_items_review_details_id ON action_items (review_details_id);
+    </sql>
+    <sql>
+      CREATE INDEX idx_action_items_is_completed ON action_items (is_completed);
+    </sql>
+    <sql>
+      CREATE INDEX idx_module_permissions_role_id ON module_permissions (role_id);
+    </sql>
+    <sql>
+      CREATE INDEX idx_module_permissions_module_id ON module_permissions (module_id);
+    </sql>
+    <sql>
+      CREATE INDEX idx_review_cycle_publish ON review_cycle (publish);
+    </sql>
+    <sql>
+      CREATE INDEX idx_review_cycle_organisation_id ON review_cycle (organisation_id);
+    </sql>
+  </changeSet>
+  <changeSet id="38" author="UA">
+    <sql>INSERT INTO modules (name) VALUES ('Analytics');</sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'true', 'true'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name = 'Org Admin'
+      AND modules.name = 'Analytics';
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'true', 'false'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name = 'Human Resource'
+      AND modules.name = 'Analytics';
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'false', 'false'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name NOT IN ('Org Admin', 'Human Resource')
+      AND modules.name = 'Analytics';
+    </sql>
+  </changeSet>
+  <changeSet id="39" author="">
+    <sql>
+      CREATE TABLE kra_version_mapping(
+      kra_id BIGINT NOT NULL,
+      version_number BIGINT NOT NULL,
+      FOREIGN KEY(kra_id) REFERENCES kra(id)
+      );
+    </sql>
+    <sql>
+      INSERT INTO kra_version_mapping (kra_id, version_number)
+      SELECT id, 1
+      FROM kra;
+    </sql>
+  </changeSet>
+  <changeSet id="40" author="RS">
+    <sql>
+      ALTER TABLE action_items
+      ADD created_at TIMESTAMP NULL;
+    </sql>
+    <sql>
+      UPDATE action_items
+      SET created_at = review_details.updated_at
+      FROM review_details
+      WHERE action_items.review_details_id = review_details.id;
+    </sql>
+    <sql>
+      ALTER TABLE action_items
+      ALTER COLUMN created_at SET NOT NULL;
+    </sql>
+    <sql>
+      ALTER TABLE action_items
+      ADD target_date TIMESTAMP NULL;
+    </sql>
+    <sql>
+      UPDATE action_items
+      SET target_date = COALESCE(data.active_end_date, data.end_date)
+      FROM (
+      SELECT
+      action_items.id AS action_item_id,
+      review_cycle.end_date,
+      review_cycle.organisation_id,
+      active_review_cycle.end_date AS active_end_date
+      FROM action_items
+      JOIN review_details ON review_details.id = action_items.review_details_id
+      JOIN review_cycle ON review_cycle.id = review_details.review_cycle_id
+      LEFT JOIN review_cycle AS active_review_cycle ON active_review_cycle.publish = true
+      AND active_review_cycle.organisation_id = review_cycle.organisation_id
+      ) AS data
+      WHERE data.action_item_id = action_items.id;
+    </sql>
+    <sql>
+      ALTER TABLE action_items
+      ALTER COLUMN target_date SET NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="41" author="MA">
+    <sql>
+      ALTER TABLE slack_details
+      ADD COLUMN webhook_url VARCHAR NOT NULL ;
+    </sql>
+  </changeSet>
+  <changeSet id="42" author="RS">
+    <sql>
+      ALTER TABLE employee_manager_mapping
+      ADD CONSTRAINT unique_index_employee_manager_mapping UNIQUE (emp_id, manager_id, type, created_at, is_active);
+    </sql>
+    <sql>
+      ALTER TABLE employees_team_mapping
+      ADD CONSTRAINT unique_index_employees_team_mapping UNIQUE (emp_id, team_id);
+    </sql>
+    <sql>
+      ALTER TABLE employees_role_mapping
+      ADD CONSTRAINT unique_index_employees_role_mapping UNIQUE (emp_id, role_id);
+    </sql>
+    <sql>
+      ALTER TABLE employees_designation_mapping
+      ADD CONSTRAINT unique_index_employees_designation_mapping UNIQUE (emp_id, designation_id);
+    </sql>
+    <sql>
+      ALTER TABLE kra_team_designation_mapping
+      ADD CONSTRAINT idx_unique_kra_team_designation_mapping UNIQUE (kra_id, team_id, designation_id);
+    </sql>
+    <sql>
+      ALTER TABLE kra_version_mapping
+      ADD CONSTRAINT idx_unique_kra_version_mapping UNIQUE (kra_id, version_number);
+    </sql>
+    <sql>
+      ALTER TABLE team_designation_mapping
+      ADD CONSTRAINT idx_unique_team_designation_mapping UNIQUE (team_id, designation_id);
+    </sql>
+    <sql>
+      ALTER TABLE review_manager_mapping
+      ADD CONSTRAINT idx_unique_review_manager_mapping UNIQUE (review_details_id, first_manager_id);
+    </sql>
+  </changeSet>
+  <changeSet id="43" author="RS">
+    <sql>
+      ALTER TABLE action_items
+      DROP COLUMN created_at,
+      DROP COLUMN target_date;
+    </sql>
+    <sql>
+      ALTER TABLE action_items
+      ADD created_at TIMESTAMP NULL DEFAULT NOW(),
+      ADD target_date DATE;
+    </sql>
+    <sql>
+      UPDATE action_items
+      SET created_at = review_details.updated_at
+      FROM review_details
+      WHERE action_items.review_details_id = review_details.id;
+    </sql>
+    <sql>
+      UPDATE action_items
+      SET target_date = COALESCE(data.active_end_date, data.end_date)
+      FROM (
+      SELECT
+      action_items.id AS action_item_id,
+      review_cycle.end_date,
+      review_cycle.organisation_id,
+      active_review_cycle.end_date AS active_end_date
+      FROM action_items
+      JOIN review_details ON review_details.id = action_items.review_details_id
+      JOIN review_cycle ON review_cycle.id = review_details.review_cycle_id
+      LEFT JOIN review_cycle AS active_review_cycle ON active_review_cycle.publish = true
+      AND active_review_cycle.organisation_id = review_cycle.organisation_id
+      ) AS data
+      WHERE data.action_item_id = action_items.id;
+    </sql>
+    <sql>
+      ALTER TABLE action_items
+      ALTER COLUMN created_at SET NOT NULL,
+      ALTER COLUMN target_date SET NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="44" author="UA">
+    <sql>
+      CREATE TABLE employees_history(
+      id BIGSERIAL PRIMARY KEY,
+      employee_id BIGINT NOT NULL,
+      activated_at TIMESTAMPTZ NOT NULL,
+      deactivated_at TIMESTAMPTZ,
+      FOREIGN KEY(employee_id) REFERENCES employees(id)
+      );
+    </sql>
+    <sql>
+      INSERT INTO employees_history (employee_id, activated_at, deactivated_at)
+      SELECT
+      e.id AS employee_id,
+      COALESCE(
+      LEAST(
+      (
+      SELECT MIN(created_at)
+      FROM feedbacks
+      WHERE feedback_to = e.id OR feedback_from = e.id
+      ),
+      (
+      SELECT MIN(start_date)
+      FROM review_cycle rc
+      WHERE rc.id IN (
+      SELECT review_cycle_id
+      FROM review_details
+      WHERE review_to = e.id OR review_from = e.id
+      )),
+      (
+      SELECT MIN(created_at)
+      FROM employee_manager_mapping
+      WHERE emp_id = e.id OR manager_id = e.id
+      )),
+      organisation.created_at) AS activated_at,
+      CASE WHEN e.status = true THEN NULL
+      WHEN e.status = false THEN
+      COALESCE(
+      GREATEST(
+      (
+      SELECT MAX(created_at)
+      FROM feedbacks
+      WHERE feedback_to = e.id OR feedback_from = e.id
+      ),
+      (
+      SELECT MAX(end_date)
+      FROM review_cycle rc
+      WHERE rc.id IN (
+      SELECT review_cycle_id
+      FROM review_details
+      WHERE review_to = e.id OR review_from = e.id
+      )),
+      (
+      SELECT MAX(created_at)
+      FROM employee_manager_mapping
+      WHERE emp_id = e.id OR manager_id = e.id
+      )),
+      organisation.created_at)
+      END AS deactivated_at
+      FROM employees e
+      LEFT JOIN (
+      SELECT
+      sr_no AS id,
+      created_at
+      FROM organisations
+      ) organisation ON e.organisation_id = organisation.id;
+    </sql>
+  </changeSet>
+  <changeSet id="45" author="UA">
+    <sql>ALTER TABLE review_cycle DROP CONSTRAINT no_overlap_org;</sql>
+    <sql>DROP INDEX IF EXISTS idx_no_overlap_org;</sql>
+    <sql>
+      ALTER TABLE review_cycle
+      ADD CONSTRAINT no_overlap_review_cycle
+      EXCLUDE USING GIST (organisation_id WITH =, daterange(start_date, end_date, '[]') WITH &amp;&amp;);
+    </sql>
+  </changeSet>
+  <changeSet id="46" author="UA">
+    <sql>INSERT INTO modules (name) VALUES ('Integrations');</sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'true', 'true'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name = 'Org Admin'
+      AND modules.name = 'Integrations';
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'true', 'false'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name = 'Human Resource'
+      AND modules.name = 'Integrations';
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'false', 'false'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name NOT IN ('Org Admin', 'Human Resource')
+      AND modules.name = 'Integrations';
+    </sql>
+  </changeSet>
+  <changeSet id="47" author="YJ">
+    <sql>
+      ALTER TABLE organisations
+      ADD COLUMN manager_review_mandatory BOOLEAN NOT NULL default false ;
+    </sql>
+  </changeSet>
+  <changeSet id="47" author="MA">
+    <sql>
+      ALTER TABLE employees
+      ADD COLUMN created_at TIMESTAMPTZ,
+      ADD COLUMN updated_at TIMESTAMPTZ,
+      ADD COLUMN gender_id INTEGER,
+      ADD COLUMN date_of_birth DATE,
+      ADD COLUMN date_of_joining DATE,
+      ADD COLUMN experience INTEGER;
+    </sql>
+    <sql>
+      UPDATE employees SET created_at =
+      COALESCE
+      ( (SELECT MIN(activated_at) FROM employees_history WHERE
+      employees.id = employees_history.employee_id),
+      (SELECT organisations.created_at FROM organisations WHERE
+      employees.organisation_id = organisations.sr_no) ) ;
+    </sql>
+    <sql>
+      ALTER TABLE employees
+      ALTER COLUMN created_at SET DEFAULT now() ;
+    </sql>
+    <sql>
+      ALTER TABLE employees
+      ALTER COLUMN created_at SET NOT NULL ;
+    </sql>
+    <sql>
+      UPDATE employees SET updated_at =
+      COALESCE
+      ( GREATEST(
+        (SELECT MAX(deactivated_at) FROM employees_history WHERE
+        employees.id = employees_history.employee_id),
+        (SELECT MAX(activated_at) FROM employees_history WHERE
+        employees.id = employees_history.employee_id),
+        (SELECT MAX(updated_at) FROM employee_manager_mapping WHERE
+        employees.id = employee_manager_mapping.emp_id)
+      ), null ) ;
+    </sql>
+  </changeSet>
+  <changeSet id="48" author="MA">
+    <sql>
+      ALTER TABLE employees
+      ADD COLUMN is_consultant BOOLEAN NOT NULL default false ;
+    </sql>
+  </changeSet>
+  <changeSet id="49" author="RS">
+    <sql>
+      CREATE TABLE departments (
+      id BIGSERIAL PRIMARY KEY,
+      department_name VARCHAR NOT NULL,
+      status BOOLEAN NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ,
+      department_id BIGINT NOT NULL,
+      organisation_id BIGINT NOT NULL,
+      FOREIGN KEY(organisation_id) REFERENCES organisations(sr_no)
+      );
+    </sql>
+    <sql>INSERT INTO modules (name) VALUES ('Departments');</sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'true', 'true'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name = 'Org Admin'
+      AND modules.name = 'Departments';
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'true', 'false'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name = 'Human Resource'
+      AND modules.name = 'Departments';
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'false', 'false'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name NOT IN ('Org Admin', 'Human Resource')
+      AND modules.name = 'Departments';
+    </sql>
+  </changeSet>
+  <changeSet id="50" author="RS">
+    <sql>
+      CREATE TABLE department_team_mapping(
+      department_id BIGINT NOT NULL,
+      team_id BIGINT NOT NULL,
+      FOREIGN KEY(department_id) REFERENCES departments(id),
+      FOREIGN KEY(team_id) REFERENCES teams(id)
+      );
+    </sql>
+    <sql>
+      ALTER TABLE department_team_mapping
+      ADD CONSTRAINT idx_unique_department_team_mapping UNIQUE (department_id, team_id);
+    </sql>
+    <sql>
+      DROP INDEX unique_teams_name_org_id;
+    </sql>
+    <sql>
+      INSERT INTO departments (department_name, status, created_at, updated_at, department_id, organisation_id)
+      SELECT 'Executive Leadership', true, now(), null, 1, sr_no
+      FROM organisations;
+    </sql>
+    <sql>
+      INSERT INTO department_team_mapping (department_id, team_id)
+      SELECT d.id, t.id
+      FROM departments d
+      JOIN teams t ON d.organisation_id = t.organisation_id
+      WHERE d.department_name = 'Executive Leadership' AND t.team_name = 'Org Admin';
+    </sql>
+    <sql>
+      INSERT INTO departments (department_name, status, created_at, updated_at, department_id, organisation_id)
+      SELECT 'Human Resource', true, now(), null, 2, sr_no
+      FROM organisations;
+    </sql>
+    <sql>
+      INSERT INTO department_team_mapping (department_id, team_id)
+      SELECT d.id, t.id
+      FROM departments d
+      JOIN teams t ON d.organisation_id = t.organisation_id
+      WHERE d.department_name = 'Human Resource' AND t.team_name = 'Human Resources';
+    </sql>
+    </changeSet>
+  <changeSet id="51" author="RS">
+    <sql>
+      CREATE TABLE employees_department_mapping (
+      emp_id BIGINT NOT NULL,
+      department_id BIGINT NOT NULL,
+      FOREIGN KEY (emp_id) REFERENCES employees(id),
+      FOREIGN KEY (department_id) REFERENCES departments(id),
+      CONSTRAINT unique_index_employees_department_mapping UNIQUE (emp_id, department_id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="52" author="UA">
+    <sql>
+      INSERT INTO employees_history (employee_id, activated_at)
+      SELECT e.id, u.created_at
+      FROM employees e
+      JOIN users u ON e.email_id = u.email_id
+      WHERE NOT EXISTS (
+      SELECT 1
+      FROM employees_history eh
+      WHERE eh.employee_id = e.id
+      );
+    </sql>
+    <sql>
+      INSERT INTO employees_history (employee_id, activated_at)
+      SELECT e.id, e.created_at
+      FROM employees e
+      WHERE NOT EXISTS(
+      SELECT 1 FROM employees_history eh
+      WHERE eh.employee_id = e.id
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="53" author="UA">
+    <sql>
+        ALTER TABLE employees_team_mapping
+        ADD COLUMN id bigserial PRIMARY KEY,
+        ADD COLUMN joined_at TIMESTAMPTZ,
+        ADD COLUMN left_at TIMESTAMPTZ,
+        ADD COLUMN is_active BOOLEAN;
+    </sql>
+    <sql>
+        UPDATE employees_team_mapping
+        SET id = nextval('employees_team_mapping_id_seq');
+    </sql>
+    <sql>
+        UPDATE employees_team_mapping etm
+        SET joined_at = (
+        SELECT MIN(eh.activated_at)
+        FROM employees_history eh
+        WHERE eh.employee_id = etm.emp_id
+        );
+    </sql>
+    <sql>
+        UPDATE employees_team_mapping etm
+        SET left_at = (
+        SELECT MAX(eh.deactivated_at)
+        FROM employees_history eh
+        WHERE eh.employee_id = etm.emp_id AND eh.deactivated_at IS NOT NULL
+        );
+    </sql>
+    <sql>
+        ALTER TABLE employees_team_mapping
+        ALTER COLUMN left_at SET DEFAULT NULL;
+    </sql>
+    <sql>
+        UPDATE employees_team_mapping
+        SET is_active = false
+        WHERE left_at IS NOT NULL;
+    </sql>
+    <sql>
+        UPDATE employees_team_mapping
+        SET is_active = true
+        WHERE left_at IS NULL;
+    </sql>
+    <sql>
+        CREATE TABLE employees_team_mapping_new (
+        id bigserial PRIMARY KEY,
+        emp_id BIGINT NOT NULL,
+        team_id BIGINT NOT NULL,
+        joined_at TIMESTAMPTZ NOT NULL,
+        left_at TIMESTAMPTZ,
+        is_active BOOLEAN NOT NULL,
+        FOREIGN KEY(emp_id) REFERENCES employees(id),
+        FOREIGN KEY(team_id) REFERENCES teams(id)
+        );
+    </sql>
+    <sql>
+        INSERT INTO employees_team_mapping_new (emp_id, team_id, joined_at, left_at, is_active)
+        SELECT emp_id, team_id, joined_at, left_at, is_active
+        FROM employees_team_mapping;
+    </sql>
+    <sql>DROP VIEW employees_team_mapping_view;</sql>
+    <sql>DROP TABLE employees_team_mapping;</sql>
+    <sql>ALTER TABLE employees_team_mapping_new RENAME TO employees_team_mapping;</sql>
+    <sql>
+        CREATE VIEW employees_team_mapping_view AS
+        SELECT etm.emp_id,
+        teams.id AS team_id,
+        teams.team_name,
+        teams.status AS team_status,
+        teams.team_id AS team_display_id,
+        teams.organisation_id
+        FROM employees_team_mapping etm
+        JOIN teams ON teams.id = etm.team_id
+        JOIN (
+        SELECT emp_id, MAX(id) AS max_id
+        FROM employees_team_mapping
+        GROUP BY emp_id
+        ) max_ids ON etm.emp_id = max_ids.emp_id AND etm.id = max_ids.max_id;
+    </sql>
+  </changeSet>
+  <changeSet id="54" author="MA">
+    <sql>
+      INSERT INTO team_designation_mapping (team_id, designation_id)
+      SELECT t.id, d.id
+      FROM teams t
+      CROSS JOIN designations d
+      WHERE t.organisation_id = d.organisation_id
+      AND t.team_name = 'Org Admin'
+      AND d.designation_name = 'Org Admin'
+      AND NOT EXISTS (
+      SELECT 1
+      FROM team_designation_mapping tdm
+      WHERE tdm.team_id = t.id
+      AND tdm.designation_id = d.id
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="55" author="UA">
+    <sql>
+      ALTER TABLE feedback_request
+      ADD COLUMN action_item_id BIGINT,
+      ADD FOREIGN KEY(action_item_id) REFERENCES action_items(id);
+    </sql>
+  </changeSet>
+  <changeSet id="56" author="RS">
+    <sql>
+      CREATE VIEW employees_department_mapping_view AS
+      SELECT
+      employees_department_mapping.emp_id,
+      departments.id,
+      departments.department_name,
+      departments.status,
+      departments.department_id,
+      departments.organisation_id
+      FROM
+      employees_department_mapping
+      JOIN departments ON departments.id = employees_department_mapping.department_id;
+    </sql>
+    <sql>
+      UPDATE module_permissions
+      SET edit = 'true'
+      WHERE role_id IN (SELECT id FROM roles WHERE role_id = 2 )
+      AND module_id IN (SELECT id FROM modules WHERE name = 'Departments');
+    </sql>
+  </changeSet>
+  <changeSet id="57" author="RS">
+    <sql>
+      CREATE TABLE kra_department_team_designation_mapping (
+      kra_id BIGINT NOT NULL,
+      department_id BIGINT,
+      team_id BIGINT NOT NULL,
+      designation_id BIGINT NOT NULL,
+      FOREIGN KEY(department_id) REFERENCES departments(id),
+      FOREIGN KEY(team_id) REFERENCES teams(id),
+      FOREIGN KEY(designation_id) REFERENCES designations(id),
+      CONSTRAINT unique_index_kra_department_team_department_mapping UNIQUE (kra_id, department_id, team_id, designation_id)
+      );
+    </sql>
+    <sql>
+      INSERT INTO kra_department_team_designation_mapping (kra_id, department_id, team_id, designation_id)
+      SELECT kra_id, null, team_id, designation_id
+      FROM kra_team_designation_mapping;
+    </sql>
+    <sql>
+      UPDATE kra_department_team_designation_mapping AS kt
+      SET department_id = d.id
+      FROM kra AS k
+      JOIN departments AS d ON k.organisation_id = d.organisation_id AND d.department_id = 2
+      AND d.status = true
+      WHERE kt.kra_id = k.id ;
+    </sql>
+    <sql>
+      ALTER TABLE kra_department_team_designation_mapping
+      ALTER COLUMN department_id SET NOT NULL;
+    </sql>
+    <sql>
+      DROP TABLE kra_team_designation_mapping;
+    </sql>
+  </changeSet>
+  <changeSet id="58" author="UA">
+    <sql>
+      ALTER TABLE employees
+      DROP CONSTRAINT employees_contact_no_key;
+    </sql>
+    <sql>
+      CREATE UNIQUE INDEX employees_contact_no_key
+      ON employees (organisation_id, contact_no);
+    </sql>
+  </changeSet>
+  <changeSet id="59" author="RS">
+    <sql>
+      DELETE FROM employees_department_mapping;
+    </sql>
+    <sql>
+      INSERT INTO employees_department_mapping (emp_id, department_id)
+      SELECT e.id AS emp_id, d.id AS department_id
+      FROM employees e
+      JOIN employees_role_mapping erm ON e.id = erm.emp_id
+      JOIN roles r ON erm.role_id = r.id AND r.role_id = 1
+      JOIN departments d ON r.organisation_id = d.organisation_id AND d.department_id = 1
+      WHERE e.organisation_id = r.organisation_id;
+    </sql>
+    <sql>
+      INSERT INTO employees_department_mapping (emp_id, department_id)
+      SELECT e.id AS emp_id, d.id AS department_id
+      FROM employees e
+      JOIN employees_role_mapping erm ON e.id = erm.emp_id
+      JOIN roles r ON erm.role_id = r.id AND r.role_id = 2
+      JOIN departments d ON r.organisation_id = d.organisation_id AND d.department_id = 2
+      WHERE e.organisation_id = r.organisation_id;
+    </sql>
+  </changeSet>
+  <changeSet id="60" author="RS">
+    <sql>
+      DELETE FROM slack_details;
+    </sql>
+    <sql>
+      ALTER TABLE slack_details
+      ADD COLUMN workspace_id VARCHAR NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="63" author="MA">
+    <sql>
+      CREATE TABLE suggestions (
+      id BIGSERIAL PRIMARY KEY,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL,
+      suggested_by BIGINT NOT NULL,
+      suggestion VARCHAR NOT NULL,
+      is_draft BOOLEAN NOT NULL,
+      FOREIGN KEY(suggested_by) REFERENCES employees(id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="61" author="MA">
+    <sql>
+      INSERT INTO modules (name)
+      SELECT new_module
+      FROM (VALUES
+      ('Request Feedback'),
+      ('Feedback'),
+      ('Teams'),
+      ('Designations'),
+      ('Roles &amp; Permissions'),
+      ('Employees'),
+      ('KRAs'),
+      ('Reviews for Team Members'),
+      ('Check-in with Team Members'),
+      ('Review Cycles'),
+      ('Company Information'),
+      ('User Activity Log'),
+      ('Performance Review'),
+      ('Allowed Domains'),
+      ('Analytics'),
+      ('Integrations'),
+      ('Departments')) AS new_modules(new_module)
+      LEFT JOIN modules ON new_modules.new_module = modules.name
+      WHERE modules.name IS NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="62" author="MA">
+    <sql>INSERT INTO modules (name)
+      SELECT module
+      FROM (VALUES ('Received Suggestions') ) AS new_modules(module)
+      LEFT JOIN modules ON new_modules.module = modules.name
+      WHERE modules.name IS NULL;
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'true', 'false'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name = 'Org Admin'
+      AND modules.name = 'Received Suggestions';
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'true', 'false'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name = 'Human Resource'
+      AND modules.name = 'Received Suggestions';
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'false', 'false'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name NOT IN ('Org Admin', 'Human Resource')
+      AND modules.name = 'Received Suggestions';
+    </sql>
+  </changeSet>
+  <changeSet id="64" author="MA">
+    <sql>
+      CREATE TABLE external_feedback_emails (
+      id BIGSERIAL PRIMARY KEY,
+      email_id VARCHAR NOT NULL,
+      organisation_id BIGINT NOT NULL,
+      FOREIGN KEY (organisation_id) REFERENCES organisations(sr_no),
+      CONSTRAINT unique_email_per_organisation UNIQUE (email_id, organisation_id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="65" author="MA">
+    <sql>
+      ALTER TABLE feedback_request
+      ADD COLUMN is_external_request BOOLEAN NOT NULL DEFAULT FALSE,
+      ADD COLUMN feedback_from_external_id BIGINT,
+      ADD CONSTRAINT feedback_request_feedback_from_external_id_fkey
+        FOREIGN KEY (feedback_from_external_id) REFERENCES external_feedback_emails (id),
+      ADD CONSTRAINT check_external_request_id
+        CHECK ((is_external_request AND feedback_from_external_id IS NOT NULL) OR NOT is_external_request);
+    </sql>
+    <sql>
+      ALTER TABLE feedback_request ALTER COLUMN feedback_from DROP NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="66" author="MA">
+    <sql>
+      ALTER TABLE feedbacks
+      ADD COLUMN feedback_from_external_id BIGINT,
+      ADD CONSTRAINT feedbacks_feedback_from_external_id_fkey
+        FOREIGN KEY (feedback_from_external_id) REFERENCES external_feedback_emails (id);
+    </sql>
+    <sql>
+      ALTER TABLE feedbacks ALTER COLUMN feedback_from DROP NOT NULL,
+      ADD CONSTRAINT chk_feedback_from_not_null
+        CHECK ((feedback_from IS NOT NULL) OR (feedback_from_external_id IS NOT NULL));
+    </sql>
+  </changeSet>
+  <changeSet id="67" author="MA">
+    <sql>
+      CREATE TABLE super_admin (
+      id BIGSERIAL PRIMARY KEY,
+      first_name VARCHAR NOT NULL,
+      last_name VARCHAR NOT NULL,
+      email_id VARCHAR NOT NULL,
+      password VARCHAR NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()) ;
+    </sql>
+  </changeSet>
+  <changeSet id="68" author="MA">
+    <sql>
+      ALTER TABLE users ADD COLUMN is_org_admin BOOLEAN NOT NULL DEFAULT TRUE,
+      ADD COLUMN is_super_admin BOOLEAN NOT NULL DEFAULT FALSE;
+    </sql>
+    <sql>
+      DROP TABLE super_admin ;
+    </sql>
+  </changeSet>
+  <changeSet id="69" author="MA">
+    <sql>
+      CREATE UNIQUE INDEX unique_department_name_per_organization ON departments (LOWER(department_name), organisation_id);
+    </sql>
+  </changeSet>
+  <changeSet id="70" author="MA">
+    <sql>
+      UPDATE modules SET name = 'Settings' WHERE name = 'Allowed Domains';
+    </sql>
+  </changeSet>
+  <changeSet id="71" author="MA">
+    <sql>
+      ALTER TABLE organisations ADD COLUMN is_anonymous_suggestion_allowed BOOLEAN NOT NULL DEFAULT TRUE;
+    </sql>
+    <sql>
+      ALTER TABLE suggestions ADD COLUMN is_anonymous BOOLEAN NOT NULL DEFAULT FALSE;
+    </sql>
+    <sql>
+      ALTER TABLE organisations RENAME COLUMN manager_review_mandatory TO is_manager_review_mandatory;
+    </sql>
+  </changeSet>
+  <changeSet id="72" author="MA">
+    <sql>
+      ALTER TABLE suggestions ADD COLUMN progress_id INTEGER ;
+    </sql>
+    <sql>
+      UPDATE suggestions SET progress_id = 1 WHERE is_draft = FALSE;
+    </sql>
+  </changeSet>
+  <changeSet id="73" author="MA">
+    <sql>
+      UPDATE module_permissions
+      SET edit = 'true'
+      WHERE role_id IN (SELECT id FROM roles WHERE role_name IN ('Org Admin', 'Human Resource'))
+      AND module_id IN (SELECT id FROM modules WHERE name = 'Received Suggestions');
+    </sql>
+  </changeSet>
+  <changeSet id="74" author="MA">
+    <sql>
+      INSERT INTO feedback_types (name)
+      SELECT feedback_type
+      FROM (VALUES
+      ('Positive'),
+      ('Improvement'),
+      ('Appreciation')) AS new_feedback_types(feedback_type)
+      LEFT JOIN feedback_types ON new_feedback_types.feedback_type = feedback_types.name
+      WHERE feedback_types.name IS NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="75" author="MA">
+    <sql>
+      INSERT INTO review_types (name)
+      SELECT review_type
+      FROM (VALUES
+      ('Self Review'),
+      ('Manager Review'),
+      ('Summary')) AS new_review_types(review_type)
+      LEFT JOIN review_types ON new_review_types.review_type = review_types.name
+      WHERE review_types.name IS NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="76" author="MA">
+    <sql>UPDATE modules set name = 'KPIs' where name = 'KRAs';</sql>
+    <sql>INSERT INTO modules(name) values ('KRAs');</sql>
+  </changeSet>
+  <changeSet id="77" author="MA">
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'true', 'true'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name = 'Org Admin'
+      AND modules.name = 'KRAs';
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'true', 'true'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name = 'Human Resource'
+      AND modules.name = 'KRAs';
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'false', 'false'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name NOT IN ('Org Admin', 'Human Resource')
+      AND modules.name = 'KRAs';
+    </sql>
+  </changeSet>
+  <changeSet id="78-kra-to-kpi" author="MA">
+    <sql>ALTER TABLE kra rename to kpi;</sql>
+    <sql>ALTER TABLE kpi RENAME COLUMN kra_id TO kpi_id;</sql>
+    <sql>ALTER INDEX kra_pkey RENAME TO kpi_pkey;</sql>
+    <sql>ALTER INDEX idx_kra_organisation_id RENAME TO idx_kpi_organisation_id;</sql>
+    <sql>ALTER INDEX idx_kra_status RENAME TO idx_kpi_status;</sql>
+    <sql>ALTER TABLE kpi RENAME CONSTRAINT "kra_organisation_id_fkey" TO "kpi_organisation_id_fkey";</sql>
+    <sql>ALTER SEQUENCE kra_kra_id_seq RENAME TO kpi_kpi_id_seq;</sql>
+  </changeSet>
+  <changeSet id="79-kra-version-mapping-to-kpi-version-mapping" author="MA">
+    <sql>ALTER TABLE kra_version_mapping RENAME TO kpi_version_mapping;</sql>
+    <sql>ALTER TABLE kpi_version_mapping RENAME COLUMN kra_id TO kpi_id;</sql>
+    <sql>ALTER INDEX idx_unique_kra_version_mapping RENAME TO idx_unique_kpi_version_mapping;</sql>
+    <sql>ALTER TABLE kpi_version_mapping RENAME CONSTRAINT "kra_version_mapping_kra_id_fkey" TO "kpi_version_mapping_kpi_id_fkey";</sql>
+  </changeSet>
+  <changeSet id="80-kra-mapping-to-kpi-mapping" author="MA">
+    <sql>ALTER TABLE kra_department_team_designation_mapping rename to kpi_department_team_designation_mapping;</sql>
+    <sql>ALTER TABLE kpi_department_team_designation_mapping RENAME COLUMN kra_id TO kpi_id;</sql>
+    <sql>ALTER INDEX unique_index_kra_department_team_department_mapping RENAME TO unique_index_kpi_department_team_department_mapping;</sql>
+    <sql>
+      ALTER TABLE kpi_department_team_designation_mapping
+      RENAME CONSTRAINT "kra_department_team_designation_mapping_department_id_fkey"
+      TO "kpi_department_team_designation_mapping_department_id_fkey";
+    </sql>
+    <sql>
+      ALTER TABLE kpi_department_team_designation_mapping
+      RENAME CONSTRAINT "kra_department_team_designation_mapping_designation_id_fkey"
+      TO "kpi_department_team_designation_mapping_designation_id_fkey";
+    </sql>
+    <sql>
+      ALTER TABLE kpi_department_team_designation_mapping
+      RENAME CONSTRAINT "kra_department_team_designation_mapping_team_id_fkey"
+      TO "kpi_department_team_designation_mapping_team_id_fkey";
+    </sql>
+  </changeSet>
+  <changeSet id="81-kra-to-kpi-in-reviews" author="MA">
+    <sql>ALTER TABLE reviews RENAME COLUMN kra_id TO kpi_id;</sql>
+    <sql>ALTER INDEX idx_reviews_kra_id RENAME TO idx_reviews_kpi_id;</sql>
+    <sql>ALTER TABLE reviews RENAME CONSTRAINT "reviews_kra_id_fkey" TO "reviews_kpi_id_fkey";</sql>
+  </changeSet>
+  <changeSet id="82" author="MA">
+    <sql>
+      CREATE TABLE kra(
+      id BIGSERIAL PRIMARY KEY,
+      sr_no BIGINT NOT NULL,
+      name VARCHAR NOT NULL,
+      weightage INTEGER NOT NULL,
+      organisation_id BIGINT NOT NULL,
+      version_number INTEGER NOT NULL,
+      FOREIGN KEY(organisation_id) REFERENCES organisations(sr_no)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="83" author="MA">
+    <sql>
+      INSERT INTO kra (sr_no, name, weightage, organisation_id, version_number)
+      SELECT ROW_NUMBER() OVER (PARTITION BY o.sr_no ORDER BY kra_data.sr_no) AS sr_no,
+      kra_data.name,
+      kra_data.weightage,
+      o.sr_no AS organisation_id,
+      1 AS version_number
+      FROM organisations o
+      JOIN (
+      VALUES
+      (1, 'Results', 60),
+      (2, 'Skill &amp; Knowledge Growth', 30),
+      (3, 'Attitude Fitment', 10)
+      ) AS kra_data (sr_no, name, weightage)
+      ON o.is_active = true
+      WHERE NOT EXISTS (
+      SELECT 1
+      FROM kra k
+      WHERE k.organisation_id = o.sr_no
+      AND k.name = kra_data.name
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="84" author="MA">
+    <sql>
+      CREATE TABLE kra_kpi_mapping (
+      kra_id BIGINT NOT NULL,
+      kpi_id BIGINT NOT NULL,
+      FOREIGN KEY(kra_id) REFERENCES kra(id),
+      FOREIGN KEY(kpi_id) REFERENCES kpi(id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="85" author="MA">
+    <sql>
+      UPDATE kra SET name = 'Skills &amp; Knowledge Growth' WHERE name = 'Skill &amp; Knowledge Growth';
+    </sql>
+  </changeSet>
+  <changeSet id="86" author="MA">
+    <sql>
+      INSERT INTO kra_kpi_mapping (kra_id, kpi_id)
+        SELECT kra.id, kpi.id FROM kpi
+          JOIN kra ON kpi.organisation_id = kra.organisation_id
+          LEFT JOIN kra_kpi_mapping mapping ON mapping.kpi_id = kpi.id
+          WHERE mapping.kpi_id IS NULL AND (
+            (kpi.id IN (
+               SELECT id FROM kpi WHERE organisation_id = kra.organisation_id ORDER BY id LIMIT 1
+            ) AND kra.sr_no = 1)
+            OR (kpi.id IN (
+            SELECT id FROM kpi WHERE organisation_id = kra.organisation_id ORDER BY id OFFSET 1 LIMIT 1
+            ) AND kra.sr_no = 2)
+            OR (kpi.id IN (
+            SELECT id FROM kpi WHERE organisation_id = kra.organisation_id ORDER BY id OFFSET 2 LIMIT 1
+            ) AND kra.sr_no = 3)
+            OR (kpi.id IN (
+            SELECT id FROM kpi WHERE organisation_id = kra.organisation_id ORDER BY id OFFSET 3
+            ) AND kra.sr_no = 1)
+          );
+    </sql>
+  </changeSet>
+  <changeSet id="87" author="MA">
+    <sql>
+      UPDATE kra SET name = 'Knowledge &amp; Skills Growth' WHERE name = 'Skills &amp; Knowledge Growth';
+    </sql>
+    <sql>
+      UPDATE kra SET sr_no = 1 WHERE name = 'Knowledge &amp; Skills Growth';
+    </sql>
+    <sql>
+      UPDATE kra SET sr_no = 2 WHERE name = 'Results';
+    </sql>
+  </changeSet>
+  <changeSet id="88" author="MA">
+    <sql>
+      CREATE TABLE review_cycle_kra(
+      id BIGSERIAL PRIMARY KEY,
+      review_cycle_id BIGINT NOT NULL,
+      kra_id BIGINT NOT NULL,
+      kra_name VARCHAR NOT NULL,
+      kra_weightage INT NOT NULL,
+      FOREIGN KEY(review_cycle_id) REFERENCES review_cycle(id),
+      FOREIGN KEY(kra_id) REFERENCES kra(id)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="89" author="MA">
+    <sql>
+      UPDATE kra SET name = 'Knowledge &amp; Skill Growth' WHERE name = 'Knowledge &amp; Skills Growth';
+    </sql>
+    <sql>
+      UPDATE review_cycle_kra SET kra_name = 'Knowledge &amp; Skill Growth' WHERE kra_name = 'Knowledge &amp; Skills Growth';
+    </sql>
+  </changeSet>
+  <changeSet id="90" author="MA">
+    <sql>
+      DELETE FROM module_permissions WHERE module_id IN ( SELECT id FROM modules WHERE name = 'Request Feedback' );
+      DELETE FROM modules WHERE name = 'Request Feedback' ;
+    </sql>
+  </changeSet>
+  <changeSet id="91" author="MA">
+    <sql>
+      CREATE VIEW feedback_request_draft_flags AS
+      SELECT
+      fr.id AS feedback_request_id,
+      EXISTS (
+      SELECT 1
+      FROM feedbacks f
+      WHERE f.request_id = fr.id
+      AND f.is_draft = true
+      ) AS has_draft_feedback
+      FROM feedback_request fr;
+    </sql>
+  </changeSet>
+  <changeSet id="92" author="MA">
+    <sql>
+      ALTER TABLE feedbacks ADD COLUMN is_read BOOLEAN NOT NULL DEFAULT false;
+      UPDATE feedbacks SET is_read = true;
+    </sql>
+  </changeSet>
+  <changeSet id="93" author="MA">
+    <sql>
+      ALTER TABLE organisations ADD COLUMN is_biweekly_feedback_reminder_enabled BOOLEAN NOT NULL DEFAULT true;
+    </sql>
+  </changeSet>
+  <changeSet id="94" author="MA">
+    <sql>
+      CREATE TABLE feedback_reminder_schedule (
+      id BIGSERIAL PRIMARY KEY,
+      organisation_id BIGINT NOT NULL UNIQUE,
+      last_sent_at TIMESTAMPTZ NOT NULL,
+      last_reminder_index INTEGER,
+      FOREIGN KEY (organisation_id) REFERENCES organisations(sr_no)
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="95" author="UA">
+      <sql>
+          ALTER TABLE organisations ADD COLUMN time_zone VARCHAR NOT NULL DEFAULT 'UTC';
+      </sql>
+  </changeSet>
+  <changeSet id="96" author="RS">
+    <sql>
+      ALTER TABLE action_items ADD COLUMN progress_id INTEGER NOT NULL DEFAULT 1;
+      UPDATE action_items
+      SET progress_id = CASE WHEN is_completed = TRUE THEN 3 ELSE 1 END;
+      ALTER TABLE action_items DROP COLUMN is_completed;
+    </sql>
+  </changeSet>
+  <changeSet id="97" author="MA">
+    <sql>
+      UPDATE organisations SET time_zone = 'Asia/Kolkata' ;
+    </sql>
+  </changeSet>
+  <changeSet id="98" author="MA">
+    <sql>INSERT INTO modules (name)
+      SELECT module
+      FROM (VALUES ('Tutorial Videos') ) AS new_modules(module)
+      LEFT JOIN modules ON new_modules.module = modules.name
+      WHERE modules.name IS NULL;
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'true', 'false'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name = 'Org Admin'
+      AND modules.name = 'Tutorial Videos';
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'true', 'false'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name = 'Human Resource'
+      AND modules.name = 'Tutorial Videos';
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT roles.id, modules.id, 'false', 'false'
+      FROM roles
+      CROSS JOIN modules
+      WHERE roles.role_name NOT IN ('Org Admin', 'Human Resource')
+      AND modules.name = 'Tutorial Videos';
+    </sql>
+  </changeSet>
+  <changeSet id="99" author="MA">
+    <sql>
+      UPDATE refresh_tokens SET revoked = true;
+    </sql>
+  </changeSet>
+  <changeSet id="100" author="MA">
+    <sql>
+      CREATE TABLE suggestion_comments (
+      id BIGSERIAL PRIMARY KEY,
+      suggestion_id BIGINT NOT NULL REFERENCES suggestions(id),
+      comment TEXT NOT NULL,
+      commented_by BIGINT NOT NULL REFERENCES employees(id),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      progress_id INTEGER
+      );
+    </sql>
+  </changeSet>
+  <changeSet id="101" author="RS">
+    <sql>
+      INSERT INTO modules (name)
+      SELECT module
+      FROM (VALUES ('Team Goals') ) AS new_modules(module)
+      LEFT JOIN modules ON new_modules.module = modules.name
+      WHERE modules.name IS NULL;
+    </sql>
+    <sql>
+      INSERT INTO module_permissions (role_id, module_id, view, edit)
+      SELECT
+      r.id,
+      m.id,
+      (r.role_name IN ('Org Admin', 'Human Resource', 'Manager')),
+      (r.role_name IN ('Org Admin', 'Human Resource', 'Manager'))
+      FROM roles AS r
+      CROSS JOIN modules AS m
+      WHERE m.name = 'Team Goals';
+    </sql>
+  </changeSet>
+  <changeSet id="102" author="UA">
+    <sql>
+      ALTER TABLE action_items
+        RENAME TO goals;
+
+      ALTER TABLE goals
+        ADD COLUMN assigned_to BIGINT,
+        ADD COLUMN created_by BIGINT,
+        ADD COLUMN updated_at TIMESTAMPTZ,
+        ADD COLUMN updated_by BIGINT,
+        ADD COLUMN type_id INTEGER,
+        ADD COLUMN goal_id INTEGER,
+        ADD COLUMN organisation_id BIGINT;
+
+      UPDATE goals g
+        SET assigned_to = rd.review_to,
+            created_by = rd.review_from,
+          organisation_id = e.organisation_id
+        FROM review_details rd JOIN employees e ON rd.review_to = e.id WHERE g.review_details_id = rd.id;
+
+      UPDATE goals SET type_id = 1;
+
+      WITH numbered AS (
+      SELECT id, organisation_id,
+      ROW_NUMBER() OVER (PARTITION BY organisation_id ORDER BY created_at ASC) AS rn
+      FROM goals
+      )
+      UPDATE goals g
+      SET goal_id = n.rn
+      FROM numbered n
+      WHERE g.id = n.id;
+
+      ALTER TABLE goals
+        RENAME COLUMN action_item TO description;
+
+      ALTER TABLE goals
+        ALTER COLUMN assigned_to SET NOT NULL,
+        ALTER COLUMN created_by SET NOT NULL,
+        ALTER COLUMN type_id SET NOT NULL,
+        ALTER COLUMN goal_id SET NOT NULL,
+        ALTER COLUMN organisation_id SET NOT NULL,
+        ADD CONSTRAINT fk_goals_assigned_to FOREIGN KEY (assigned_to) REFERENCES employees(id),
+        ADD CONSTRAINT fk_goals_created_by FOREIGN KEY (created_by) REFERENCES employees(id),
+        ADD CONSTRAINT fk_goals_updated_by FOREIGN KEY (updated_by) REFERENCES employees(id),
+        ADD CONSTRAINT fk_goals_org FOREIGN KEY (organisation_id) REFERENCES organisations(sr_no),
+        ADD CONSTRAINT uq_goals_org_goal_id UNIQUE (organisation_id, goal_id);
+
+      ALTER SEQUENCE action_items_id_seq RENAME TO goals_id_seq;
+
+      ALTER TABLE goals
+        ALTER COLUMN id SET DEFAULT nextval('goals_id_seq'),
+        ALTER COLUMN review_details_id DROP NOT NULL;
+    </sql>
+  </changeSet>
+  <changeSet id="103" author="UA">
+    <sql>
+      ALTER TABLE feedback_request
+      DROP CONSTRAINT feedback_request_action_item_id_fkey;
+
+      ALTER TABLE feedback_request
+      RENAME COLUMN action_item_id TO goal_id;
+
+      ALTER TABLE feedback_request
+      ADD CONSTRAINT feedback_request_goal_id_fkey
+      FOREIGN KEY (goal_id) REFERENCES goals(id);
+      </sql>
+  </changeSet>
+</databaseChangeLog>
