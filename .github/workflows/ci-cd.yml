@@ -1,0 +1,33 @@
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::136079914571:role/github-actions-oidc-role
+          aws-region: us-west-2
+
+      - name: Build Docker image
+        run: |
+          export RELEASE_TAG=$(grep -o '[0-9]\\+' release_tag.txt)
+          docker build -t 136079914571.dkr.ecr.us-west-2.amazonaws.com/skillwatch-service:$RELEASE_TAG .
+
+      - name: Login to Amazon ECR
+        run: aws ecr get-login-password | docker login --username AWS --password-stdin 136079914571.dkr.ecr.us-west-2.amazonaws.com
+
+      - name: Push Docker image
+        run: |
+          export RELEASE_TAG=$(grep -o '[0-9]\\+' release_tag.txt)
+          docker push 136079914571.dkr.ecr.us-west-2.amazonaws.com/skillwatch-service:$RELEASE_TAG
+
+      - name: Render new ECS task definition
+        id: render-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: .aws/ecs/task-definitions/dev/xyz.json
+          container-name: web
+          image: 136079914571.dkr.ecr.us-west-2.amazonaws.com/skillwatch-service:${{ env.RELEASE_TAG }}
+
+      - name: Deploy ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-task-def.outputs.task-definition }}
+          service: skillwatch-service
+          cluster: skillwatch-cluster
